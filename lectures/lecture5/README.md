@@ -4,8 +4,11 @@ VPC v1 で構想したプロダクトの「動くプロトタイプ v1」を AI 
 
 ## 成果物
 
-- **本番URL**: https://tidy-prototype-v1.vercel.app
-- **コード**: [`prototype/index.html`](./prototype/index.html)
+| 形態 | 場所 | 用途 |
+|---|---|---|
+| 🌐 Web プロトタイプ | https://tidy-prototype-v1.vercel.app | 価値を伝えるデモ (Discord 提出用) |
+| 🤖 Claude Code Skill | [`skill/tidy/`](./skill/tidy/) | AI エージェントが実際にファイル整理を行う実装 |
+| 📄 ソースコード | [`prototype/index.html`](./prototype/index.html) | Web プロトタイプのコード |
 
 ## プロダクト概要
 
@@ -31,5 +34,11 @@ VPC v1 で構想したプロダクトの「動くプロトタイプ v1」を AI 
 ## ローカルで開く
 
 ```bash
+# Web プロトタイプ
 open lectures/lecture5/prototype/index.html
+
+# Claude Code スキルをインストール
+mkdir -p ~/.claude/skills && cp -r lectures/lecture5/skill/tidy ~/.claude/skills/
 ```
+
+詳細は [`skill/tidy/README.md`](./skill/tidy/README.md) を参照。
