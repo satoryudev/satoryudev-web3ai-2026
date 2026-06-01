@@ -57,7 +57,7 @@
     letter-spacing: -0.03em; margin-bottom: 24px;
   }
   .hero h1 .strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
-  .hero h1 .hl { background: linear-gradient(180deg, transparent 60%, var(--accent) 60%); padding: 0 4px; color: var(--bg); }
+  .hero h1 .hl { background: var(--accent); padding: 0 8px; color: var(--bg); border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
   .hero p.lead { font-size: 18px; color: var(--muted); max-width: 660px; margin-bottom: 28px; }
   .hero p.lead b { color: var(--fg); }
   .cta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 36px; }
@@ -71,6 +71,11 @@
   .btn-ghost:hover { border-color: var(--accent); }
   .meta-row { display: flex; gap: 24px; flex-wrap: wrap; font-size: 13px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
   .meta-row span::before { content: "▸ "; color: var(--accent); }
+
+  /* ====== DISCLAIMER ====== */
+  .disclaimer { margin: 28px 0 0; padding: 14px 16px; border: 1px solid var(--accent2); border-radius: 12px; background: rgba(255,90,54,0.08); font-size: 14px; line-height: 1.7; color: #ececdf; }
+  .disclaimer b { color: var(--accent2); }
+  .disclaimer a { color: var(--accent); }
 
   /* ====== SECTION COMMON ====== */
   .section-tag {
@@ -229,6 +234,11 @@
       <span>実装 / dir-organizer（Claude Code skill）</span>
       <span>v1 → v2</span>
     </div>
+    <div class="disclaimer">
+      ⚠ このページは <b>デモ（UIシミュレーション）です。実際のAPIやファイルシステムは使っていません</b>
+      — ボタンの動きはすべてブラウザ内の演出です。<b>本物の実装</b>（実際にファイルを安全に整理する）は
+      GitHub の <a href="https://github.com/satoryudev/dir-organizer" target="_blank" rel="noopener">dir-organizer</a>（Claude Code スキル）の方です。
+    </div>
   </div>
 </section>
 
@@ -271,7 +281,7 @@
     <div class="demo">
       <div class="demo-head">
         <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-        <div class="demo-title">tidy v2 — safe consolidate</div>
+        <div class="demo-title">tidy v2 — safe consolidate（UIシミュレーション / API未使用）</div>
       </div>
       <div class="stepper" id="stepper"></div>
       <div class="demo-body">
