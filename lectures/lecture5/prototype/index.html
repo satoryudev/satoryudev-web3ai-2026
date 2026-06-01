@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tidy — AIファイル整理アシスタント v1</title>
+<meta name="description" content="「あとで整理しよう」を終わらせる。AIがあなたのファイルを自動分類・自然言語で検索できる、デスクトップのもう一つの脳。" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f5f5f0;
+    --muted: #8a8a85;
+    --accent: #d6ff3e;
+    --accent2: #ff5a36;
+    --card: #161614;
+    --border: #2a2a26;
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Noto Sans JP", system-ui, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* ====== HEADER ====== */
+  header {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .nav { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-weight: 900; font-size: 22px; letter-spacing: -0.02em; }
+  .logo span { color: var(--accent); }
+  .badge {
+    font-size: 11px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  /* ====== HERO ====== */
+  .hero { padding: 100px 0 60px; position: relative; }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+  .hero h1 .strike { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+  .hero h1 .hl {
+    background: linear-gradient(180deg, transparent 60%, var(--accent) 60%);
+    padding: 0 4px;
+    color: var(--bg);
+  }
+  .hero p.lead {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 620px;
+    margin-bottom: 40px;
+  }
+  .hero p.lead b { color: var(--fg); }
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+  }
+  .meta-row span::before { content: "▸ "; color: var(--accent); }
+
+  /* ====== DEMO PANEL ====== */
+  .demo {
+    margin-top: 80px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .demo-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0e0e0c;
+  }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #333; }
+  .dot:nth-child(1) { background: #ff5f56; }
+  .dot:nth-child(2) { background: #ffbd2e; }
+  .dot:nth-child(3) { background: #27c93f; }
+  .demo-title {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .demo-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 480px;
+  }
+  @media (max-width: 760px) {
+    .demo-body { grid-template-columns: 1fr; }
+  }
+
+  /* before */
+  .panel {
+    padding: 28px;
+    overflow-y: auto;
+  }
+  .panel.left { border-right: 1px solid var(--border); }
+  .panel-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    letter-spacing: 0.1em;
+  }
+  .panel h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .panel h3 .red { color: var(--accent2); }
+  .panel h3 .green { color: var(--accent); }
+
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: "JetBrains Mono", monospace;
+    color: #c8c8c0;
+    transition: background 0.2s;
+  }
+  .file-row:hover { background: #1f1f1c; }
+  .file-row .icon { width: 18px; text-align: center; }
+  .file-row .name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-row .size { color: var(--muted); font-size: 11px; }
+
+  /* after - tree */
+  .folder { margin-bottom: 4px; }
+  .folder-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .folder-head:hover { background: #1f1f1c; }
+  .folder-head .chev { color: var(--muted); transition: transform 0.2s; }
+  .folder.open .chev { transform: rotate(90deg); }
+  .folder-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--muted);
+    background: #232320;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .folder-children {
+    padding-left: 28px;
+    display: none;
+  }
+  .folder.open .folder-children { display: block; }
+  .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #2a2a26;
+    color: var(--accent);
+    border-radius: 4px;
+    font-size: 10px;
+    margin-left: 6px;
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  /* run button */
+  .run-bar {
+    grid-column: 1 / -1;
+    padding: 18px 28px;
+    background: #0e0e0c;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  button.run {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 12px 24px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 14px;
+    transition: transform 0.15s;
+  }
+  button.run:hover { transform: translateY(-1px); }
+  button.run:active { transform: translateY(0); }
+  button.run:disabled { opacity: 0.5; cursor: not-allowed; }
+  .run-status {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .run-status .blink { color: var(--accent); animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+
+  /* ====== SEARCH ====== */
+  .search-section { padding: 100px 0 60px; }
+  .section-tag {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .section-h {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 40px;
+  }
+  .search-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.2s;
+  }
+  .search-input-wrap:focus-within { border-color: var(--accent); }
+  .search-input-wrap .ico { color: var(--accent); font-weight: 700; }
+  .search-input-wrap input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .chip {
+    background: #232320;
+    color: #c8c8c0;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  .search-results {
+    margin-top: 24px;
+    min-height: 60px;
+  }
+  .result {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    animation: slideIn 0.3s ease-out;
+  }
+  .result:last-child { border-bottom: none; }
+  .result .icon { font-size: 22px; }
+  .result .info { flex: 1; }
+  .result .name { font-weight: 500; font-size: 14px; }
+  .result .meta { font-size: 11px; color: var(--muted); font-family: "JetBrains Mono", monospace; margin-top: 2px; }
+  .result .relevance {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(214,255,62,0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .empty-state {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  /* ====== FEATURES ====== */
+  .features {
+    padding: 60px 0 100px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .feat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .feat:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .feat .num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .feat h4 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .feat p { font-size: 14px; color: var(--muted); }
+
+  /* ====== VPC CITE ====== */
+  .vpc-cite {
+    margin-top: 60px;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(214,255,62,0.04), rgba(255,90,54,0.04));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .vpc-cite h5 {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 16px;
+  }
+  .vpc-cite blockquote {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #d8d8d0;
+    border-left: 3px solid var(--accent);
+    padding-left: 20px;
+  }
+  .vpc-cite .source {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  /* ====== FOOTER ====== */
+  footer {
+    padding: 40px 0 60px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer .row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* utility */
+  .pulse {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <div class="logo">Tidy<span>.</span></div>
+    <div class="badge">PROTOTYPE v1 · 2026-05</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h1>
+      <span class="strike">あとで整理しよう。</span><br/>
+      <span class="hl">あとは、ない。</span>
+    </h1>
+    <p class="lead">
+      デスクトップに散らかった <b>437個のファイル</b>、思い出せない保存場所、重複した「コピー (3).pdf」。
+      <b>Tidy</b> は AI があなたのファイルを文脈で理解して自動分類し、<b>「先月の請求書」</b>のような自然言語で一発検索できる、もうひとつの脳です。
+    </p>
+    <div class="meta-row">
+      <span>解決するバグ #18 / PCのファイル整理が進まない</span>
+      <span>誰のため / 自分自身 + 同じ症状を抱えた身近な人</span>
+      <span>VPC v1 由来</span>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="demo">
+    <div class="demo-head">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="demo-title">~/Desktop ─ tidy demo</div>
+    </div>
+    <div class="demo-body">
+      <div class="panel left">
+        <div class="panel-label">BEFORE</div>
+        <h3><span class="red">●</span> 散らかったデスクトップ</h3>
+        <div id="messy-list"></div>
+      </div>
+      <div class="panel right">
+        <div class="panel-label">AFTER</div>
+        <h3><span class="green">●</span> AI が自動分類</h3>
+        <div id="tidy-list">
+          <div class="empty-state">「AIで整理する」を押してください</div>
+        </div>
+      </div>
+      <div class="run-bar">
+        <button class="run" id="run-btn">⚡ AIで整理する</button>
+        <div class="run-status" id="status">
+          <span class="pulse"></span> 24 ファイルを検出 · 重複 3 · 未分類 24
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="search-section">
+  <div class="container">
+    <div class="section-tag">自然言語検索</div>
+    <h2 class="section-h">「先月撮った写真」<br/>でファイルが見つかる。</h2>
+
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <span class="ico">🔍</span>
+        <input id="search" type="text" placeholder="例: 先月の請求書 / 卒論のpdf / 旅行の写真" autocomplete="off" />
+      </div>
+      <div class="chips">
+        <div class="chip" data-q="請求書">請求書</div>
+        <div class="chip" data-q="先月の写真">先月の写真</div>
+        <div class="chip" data-q="卒論">卒論</div>
+        <div class="chip" data-q="重複している">重複している</div>
+        <div class="chip" data-q="スクショ">スクショ</div>
+      </div>
+      <div class="search-results" id="search-results">
+        <div class="empty-state">クエリを入力するか、上のサジェストをタップ</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="container">
+    <div class="section-tag">v1 機能</div>
+    <h2 class="section-h">いま、動くもの。</h2>
+    <div class="grid">
+      <div class="feat">
+        <div class="num">01</div>
+        <h4>AI 自動分類</h4>
+        <p>ファイル名・拡張子・更新日からカテゴリを推定し、未整理ゾーンをゼロにする。</p>
+      </div>
+      <div class="feat">
+        <div class="num">02</div>
+        <h4>自然言語検索</h4>
+        <p>「先月の請求書」「旅行の写真」のような曖昧な言葉で目的のファイルに到達できる。</p>
+      </div>
+      <div class="feat">
+        <div class="num">03</div>
+        <h4>重複検出</h4>
+        <p>「コピー」「(3)」など、ファイル名と内容の類似性から重複候補をハイライト。</p>
+      </div>
+    </div>
+
+    <div class="vpc-cite">
+      <h5>VPC v1 · Pain → Pain Reliever のマッピング</h5>
+      <blockquote>
+        「<b>あとで整理しようとして無限にやらない</b>」「<b>どこに保存したか忘れる</b>」「<b>同じファイルが大量に重複している</b>」 ──
+        この3つの Pain に対して、<b>自動分類</b> / <b>自然言語検索</b> / <b>重複検出</b> という最小限の Pain Reliever を v1 として実装。
+      </blockquote>
+      <div class="source">出典: lectures/lecture3/vpc-v1.md (satoryudev)</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container row">
+    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 5</div>
+    <div class="mono">v1.0.0 · prototype</div>
+  </div>
+</footer>
+
+<script>
+  // ---------- データ ----------
+  const messyFiles = [
+    { icon: "📄", name: "スクリーンショット 2026-04-13 14.22.png", size: "1.2 MB", cat: "screenshots", date: "2026-04-13", keywords: ["スクショ","screenshot","画像"] },
+    { icon: "📄", name: "スクリーンショット 2026-04-15 09.41.png", size: "892 KB", cat: "screenshots", date: "2026-04-15", keywords: ["スクショ","screenshot","画像"] },
+    { icon: "📄", name: "スクリーンショット 2026-05-02 23.10.png", size: "1.5 MB", cat: "screenshots", date: "2026-05-02", keywords: ["スクショ","screenshot","画像"] },
+    { icon: "📑", name: "請求書_4月分.pdf", size: "248 KB", cat: "invoices", date: "2026-04-30", keywords: ["請求書","invoice","4月","先月"] },
+    { icon: "📑", name: "Invoice-2026-04-AWS.pdf", size: "112 KB", cat: "invoices", date: "2026-04-28", keywords: ["請求書","invoice","aws","先月"] },
+    { icon: "📑", name: "請求書のコピー.pdf", size: "248 KB", cat: "invoices", date: "2026-05-01", keywords: ["請求書","重複","copy","重複している"] },
+    { icon: "🖼️", name: "IMG_4421.jpg", size: "4.8 MB", cat: "photos", date: "2026-04-22", keywords: ["写真","photo","先月","旅行"] },
+    { icon: "🖼️", name: "IMG_4422.jpg", size: "5.1 MB", cat: "photos", date: "2026-04-22", keywords: ["写真","photo","先月","旅行"] },
+    { icon: "🖼️", name: "IMG_4423.jpg", size: "4.2 MB", cat: "photos", date: "2026-04-23", keywords: ["写真","photo","先月","旅行"] },
+    { icon: "📝", name: "卒論_第3章_v7.docx", size: "1.8 MB", cat: "thesis", date: "2026-05-10", keywords: ["卒論","論文","thesis","レポート"] },
+    { icon: "📝", name: "卒論_第3章_v7のコピー.docx", size: "1.8 MB", cat: "thesis", date: "2026-05-11", keywords: ["卒論","重複","copy","重複している"] },
+    { icon: "📝", name: "Untitled.docx", size: "32 KB", cat: "misc", date: "2026-05-12", keywords: ["未分類","untitled"] },
+    { icon: "📦", name: "node_modules.zip", size: "184 MB", cat: "archive", date: "2026-03-04", keywords: ["zip","アーカイブ","archive"] },
+    { icon: "🎬", name: "lecture3_収録.mov", size: "1.2 GB", cat: "video", date: "2026-05-07", keywords: ["動画","video","講義"] },
+    { icon: "💻", name: "プロトタイプ草案.fig", size: "12 MB", cat: "design", date: "2026-05-20", keywords: ["fig","figma","デザイン"] },
+    { icon: "📄", name: "メモ.txt", size: "4 KB", cat: "misc", date: "2026-05-15", keywords: ["メモ","memo"] },
+    { icon: "📄", name: "新規ドキュメント.txt", size: "0 KB", cat: "misc", date: "2026-05-15", keywords: ["未分類","空"] },
+    { icon: "📑", name: "確定申告_2025.pdf", size: "1.1 MB", cat: "invoices", date: "2026-02-20", keywords: ["税金","確定申告","書類"] },
+    { icon: "🖼️", name: "プロフィール画像_v2.png", size: "320 KB", cat: "photos", date: "2026-03-12", keywords: ["プロフィール","画像"] },
+    { icon: "🎵", name: "lo-fi-loop.mp3", size: "8.4 MB", cat: "audio", date: "2026-01-04", keywords: ["音楽","mp3"] },
+    { icon: "📦", name: "backup_2024.zip", size: "2.1 GB", cat: "archive", date: "2024-12-31", keywords: ["バックアップ","backup","古い"] },
+    { icon: "💻", name: "vpc-v1.pdf", size: "180 KB", cat: "thesis", date: "2026-05-13", keywords: ["vpc","講義","レポート"] },
+    { icon: "📑", name: "領収書_Amazon.pdf", size: "92 KB", cat: "invoices", date: "2026-04-18", keywords: ["領収書","請求書","先月"] },
+    { icon: "📄", name: "DSC_0091.jpg", size: "3.7 MB", cat: "photos", date: "2026-04-30", keywords: ["写真","先月"] },
+  ];
+
+  const categories = {
+    photos: { label: "📷 写真", desc: "image" },
+    screenshots: { label: "🖥️ スクリーンショット", desc: "screen" },
+    invoices: { label: "💴 請求書・領収書", desc: "finance" },
+    thesis: { label: "📚 学業・論文", desc: "study" },
+    video: { label: "🎬 動画", desc: "video" },
+    audio: { label: "🎵 音声", desc: "audio" },
+    design: { label: "🎨 デザイン", desc: "design" },
+    archive: { label: "📦 アーカイブ", desc: "archive" },
+    misc: { label: "🗂️ その他", desc: "misc" },
+  };
+
+  // ---------- before レンダリング ----------
+  const messyList = document.getElementById("messy-list");
+  // shuffle to feel chaotic
+  const shuffled = [...messyFiles].sort(() => Math.random() - 0.5);
+  shuffled.forEach((f) => {
+    const el = document.createElement("div");
+    el.className = "file-row";
+    el.innerHTML = `<span class="icon">${f.icon}</span><span class="name">${f.name}</span><span class="size">${f.size}</span>`;
+    messyList.appendChild(el);
+  });
+
+  // ---------- AIで整理 ----------
+  const runBtn = document.getElementById("run-btn");
+  const statusEl = document.getElementById("status");
+  const tidyList = document.getElementById("tidy-list");
+
+  runBtn.addEventListener("click", async () => {
+    runBtn.disabled = true;
+    const steps = [
+      "ファイル名と拡張子を解析中...",
+      "更新日時から文脈を推定中...",
+      "類似ファイルを検出中...",
+      "カテゴリを生成中...",
+      "整理完了。",
+    ];
+    for (const s of steps) {
+      statusEl.innerHTML = `<span class="blink">▸</span> ${s}`;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+
+    // group
+    const grouped = {};
+    messyFiles.forEach((f) => {
+      if (!grouped[f.cat]) grouped[f.cat] = [];
+      grouped[f.cat].push(f);
+    });
+
+    tidyList.innerHTML = "";
+    const order = ["photos","screenshots","invoices","thesis","video","design","audio","archive","misc"];
+    order.forEach((catKey) => {
+      if (!grouped[catKey]) return;
+      const items = grouped[catKey];
+      const folder = document.createElement("div");
+      folder.className = "folder open";
+      const hasDup = items.some((i) => i.keywords.includes("重複"));
+      folder.innerHTML = `
+        <div class="folder-head">
+          <span class="chev">▶</span>
+          <span>${categories[catKey].label}</span>
+          ${hasDup ? '<span class="tag">重複あり</span>' : ''}
+          <span class="folder-count">${items.length}</span>
+        </div>
+        <div class="folder-children"></div>
+      `;
+      tidyList.appendChild(folder);
+      const children = folder.querySelector(".folder-children");
+      items.forEach((f) => {
+        const row = document.createElement("div");
+        row.className = "file-row";
+        row.innerHTML = `<span class="icon">${f.icon}</span><span class="name">${f.name}</span><span class="size">${f.size}</span>`;
+        children.appendChild(row);
+      });
+      folder.querySelector(".folder-head").addEventListener("click", () => {
+        folder.classList.toggle("open");
+      });
+    });
+
+    statusEl.innerHTML = `<span class="pulse"></span> 24 ファイル → 8 カテゴリに分類 · 重複 2 件を検出`;
+  });
+
+  // ---------- 自然言語検索 ----------
+  const searchInput = document.getElementById("search");
+  const resultsEl = document.getElementById("search-results");
+
+  function search(query) {
+    if (!query || !query.trim()) {
+      resultsEl.innerHTML = '<div class="empty-state">クエリを入力するか、上のサジェストをタップ</div>';
+      return;
+    }
+    const q = query.trim().toLowerCase();
+    const scored = messyFiles
+      .map((f) => {
+        let score = 0;
+        if (f.name.toLowerCase().includes(q)) score += 5;
+        f.keywords.forEach((k) => {
+          if (q.includes(k.toLowerCase()) || k.toLowerCase().includes(q)) score += 3;
+        });
+        // partial keyword
+        f.keywords.forEach((k) => {
+          q.split(/\s+/).forEach((tok) => {
+            if (tok && k.toLowerCase().includes(tok)) score += 1;
+          });
+        });
+        return { f, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    if (scored.length === 0) {
+      resultsEl.innerHTML = '<div class="empty-state">該当ファイルがありません。別の言葉でお試しください。</div>';
+      return;
+    }
+    const maxScore = scored[0].score;
+    resultsEl.innerHTML = scored
+      .map((x) => {
+        const rel = Math.round((x.score / maxScore) * 100);
+        return `
+          <div class="result">
+            <div class="icon">${x.f.icon}</div>
+            <div class="info">
+              <div class="name">${x.f.name}</div>
+              <div class="meta">${categories[x.f.cat].label} · ${x.f.size} · ${x.f.date}</div>
+            </div>
+            <div class="relevance">${rel}% match</div>
+          </div>`;
+      })
+      .join("");
+  }
+
+  searchInput.addEventListener("input", (e) => search(e.target.value));
+  document.querySelectorAll(".chip").forEach((c) => {
+    c.addEventListener("click", () => {
+      searchInput.value = c.dataset.q;
+      search(c.dataset.q);
+    });
+  });
+</script>
+
+</body>
+</html>
