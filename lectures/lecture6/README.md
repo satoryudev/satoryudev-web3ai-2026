@@ -8,7 +8,7 @@ v1 の「見た目だけの mock」から、**本当に動く・信頼できる*
 | 形態 | 場所 | 用途 |
 |---|---|---|
 | 🌐 Web プロトタイプ v2 | https://tidy-prototype-v2.vercel.app | 価値を伝えるデモ（Discord 提出用） |
-| 🤖 実装（本物） | https://github.com/satoryudev/dir-organizer | 実際にファイル整理を行う Claude Code Skill（テスト35項目合格） |
+| 🤖 実装（本物） | https://github.com/satoryudev/tidy | 実際にファイル整理を行う Claude Code Skill（テスト35項目合格） |
 | 📄 ソースコード | [`prototype/index.html`](./prototype/index.html) | Web プロトタイプ v2 のコード |
 | 🌐 v1（比較用） | https://tidy-prototype-v1.vercel.app | 第5回の mock デモ |
 
@@ -22,7 +22,7 @@ v1 の「見た目だけの mock」から、**本当に動く・信頼できる*
 
 ## v2 で実装したこと（v1 → v2 差分）
 
-| 観点 | v1（mock） | v2（本物 = dir-organizer） |
+| 観点 | v1（mock） | v2（本物 = tidy） |
 |---|---|---|
 | 実体 | 見た目だけ・動かない | 公開スキル・テスト35項目合格 |
 | 分類 | 名前・拡張子・日付 | **ファイルの中身（スニペット）も読む** |
@@ -39,8 +39,8 @@ v1 の「見た目だけの mock」から、**本当に動く・信頼できる*
 open lectures/lecture6/prototype/index.html
 
 # 実装（本物）をインストールして使う
-git clone https://github.com/satoryudev/dir-organizer.git
-ln -s "$(pwd)/dir-organizer" ~/.claude/skills/dir-organizer
+git clone https://github.com/satoryudev/tidy.git
+ln -s "$(pwd)/tidy" ~/.claude/skills/tidy
 # あとは Claude Code に「このフォルダを整理して」「講義資料をまとめて」と頼む
 ```
 
@@ -57,7 +57,7 @@ ln -s "$(pwd)/dir-organizer" ~/.claude/skills/dir-organizer
 一言ピッチ：ファイル整理アプリが怖いのは「勝手に消される・どこ行ったか分からなくなる」から。Tidy v2 は “消さない・見せる・全部戻せる” を実装した、安心して押せるAI整理スキル。
 
 デプロイURL：https://tidy-prototype-v2.vercel.app
-実装（本物）：https://github.com/satoryudev/dir-organizer
+実装（本物）：https://github.com/satoryudev/tidy
 
 v1からの差分：見た目だけのmock → 本当に動く実装へ。削除せず_捨てへ隔離／実行前プレビュー／全操作をundo／散らばった講義資料を中身を見て1か所に集約。
 
