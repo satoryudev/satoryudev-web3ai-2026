@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tidy v3 — コードを壊さないAIファイル整理</title>
-<meta name="description" content="v2 で『怖くないから押せる』を作った。v3 は『コードを壊さない』を入れた — import を読んで、main.py と helper.py を一緒に運ぶ。Tidy v3。82テスト合格。" />
+<title>Tidy v4 — 価値検証で見つけた「普通に使える」</title>
+<meta name="description" content="v3 を人に見せたら最初の質問は『Downloads を別フォルダへ振り分けたい』だった。当時の v3 は対応していなかった。v4 はその場で本体を直して『普通の使い方が普通に動く』を実装。Tidy v4。89テスト合格。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -157,6 +157,21 @@
   .log-line { font-family: "JetBrains Mono", monospace; font-size: 11px; color: #b8b8b0; padding: 2px 0; }
   .log-line .t { color: var(--muted); } .log-line .ok { color: var(--safe); } .log-line .q { color: var(--accent2); }
 
+  /* ====== V4 VALIDATION FEEDBACK ====== */
+  .feedback-section { padding: 80px 0 30px; }
+  .feedback-box { background: var(--card); border: 1px solid var(--accent2); border-radius: 16px; padding: 32px; }
+  .feedback-quote { font-size: 22px; font-weight: 700; color: var(--fg); line-height: 1.5; padding: 18px 22px; background: rgba(255,90,54,0.08); border-left: 4px solid var(--accent2); border-radius: 8px; margin: 18px 0 22px; }
+  .feedback-quote .qm { color: var(--accent2); font-size: 28px; vertical-align: -4px; margin-right: 4px; }
+  .feedback-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0; }
+  @media (max-width: 760px) { .feedback-flow { grid-template-columns: 1fr; } }
+  .fb-step { padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: #0e0e0c; }
+  .fb-step .fb-num { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--accent2); margin-bottom: 6px; }
+  .fb-step .fb-h { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .fb-step .fb-p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .fb-code { font-family: "JetBrains Mono", monospace; font-size: 11px; color: #cfcfc8; background: #0a0a0a; padding: 6px 10px; border-radius: 4px; margin-top: 6px; display: block; word-break: break-all; }
+  .fb-code .err { color: var(--accent2); }
+  .fb-code .ok { color: var(--safe); }
+
   /* ====== CLUSTER VIZ (v3) ====== */
   .cluster-section { padding: 80px 0 40px; }
   .cluster-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
@@ -232,6 +247,9 @@
   .diff-table td.v3 { color: var(--safe); font-weight: 500; }
   .diff-table td.v3 b { color: var(--safe); }
   .diff-table th.v3-h { color: var(--safe); }
+  .diff-table td.v4 { color: var(--accent2); font-weight: 500; }
+  .diff-table td.v4 b { color: var(--accent2); }
+  .diff-table th.v4-h { color: var(--accent2); }
   .diff-table tr:last-child td { border-bottom: none; }
   .diff-table .axis { font-weight: 700; }
 
@@ -252,7 +270,7 @@
   <div class="container nav">
     <div class="logo">Tidy<span>.</span></div>
     <div class="nav-right">
-      <span class="badge">PROTOTYPE v3 · 2026-06</span>
+      <span class="badge">PROTOTYPE v4 · 2026-06 · 価値検証</span>
       <a class="gh-link" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </div>
@@ -261,57 +279,59 @@
 <section class="hero">
   <div class="container">
     <h1>
-      <span class="strike">片づけたら、import が壊れた。</span><br/>
-      <span class="hl">関係するものは、一緒に運ぶ。</span>
+      <span class="strike">「便利そう」では、使われない。</span><br/>
+      <span class="hl">「普通の使い方」が、普通に動く。</span>
     </h1>
     <p class="lead">
-      v2 で <b>「怖くないから押せる」</b>を作った。コードフォルダに当てたら次の問題が出た:
-      <b>main.py</b> と <b>helper.py</b> が別フォルダに振り分けられて <b>import が壊れた</b>。
-      消さなくても、関係性が切れたら壊れる。<b>Tidy v3</b> は <b>依存関係を読んで</b>、
-      連結しているファイル群を <b>1つのクラスタとして一緒に運ぶ</b>。
+      v3 を人に見せて <b>「継続して使いたい？」</b>を聞いた。返ってきた最初の質問は
+      <b>「Downloads のデータをホームディレクトリの別ディレクトリに移動とかできないの？」</b>。
+      試したら、当時の v3 はエラーで動かなかった。<b>Tidy v4</b> は その場で本体を直し、
+      <b>scan ~/Downloads → suggest --target ~/Documents が素直に動く</b> ようにした。
+      「コードを壊さない」を v3 で謳ったその次の瞬間に、<b>普通のユースケース</b>を壊していた。
     </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト82項目）</a>
+      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト89項目）</a>
+      <a class="btn btn-ghost" href="https://tidy-prototype-v3.vercel.app" target="_blank" rel="noopener">v3 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v2.vercel.app" target="_blank" rel="noopener">v2 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v1.vercel.app" target="_blank" rel="noopener">v1（mock）を見る</a>
     </div>
     <div class="meta-row">
       <span>解決するバグ #18 / ファイル整理が進まない</span>
       <span>実装 / tidy（Claude Code skill）</span>
-      <span>v1 → v2 → v3</span>
+      <span>v1 → v2 → v3 → v4（価値検証）</span>
     </div>
     <div class="disclaimer">
       ⚠ このページは <b>デモ（UIシミュレーション）です。実際のAPIやファイルシステムは使っていません</b>
       — ボタンの動きはすべてブラウザ内の演出です。<b>本物の実装</b>（実際にファイルを安全に整理する）は
-      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト82項目合格）の方です。
+      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト89項目合格）の方です。
     </div>
   </div>
 </section>
 
 <section class="why">
   <div class="container">
-    <span class="section-tag">v2 を使ってみて気づいたこと</span>
-    <h2 class="section-h">「消さない」だけでは、<br/>足りなかった。</h2>
-    <p class="section-sub">v2 で「怖くないから押せる」が完成して、実際にコードフォルダに当ててみた。ファイルは生きてる。でも <b>関係性が切れて、プログラムが動かなくなった</b>。「壊さない」の盲点だった。</p>
+    <span class="section-tag">v3 を見せて聞いた「継続して使いたい？」</span>
+    <h2 class="section-h">「派手な新機能」じゃなく、<br/>「自分の普段のフロー」が動くか。</h2>
+    <p class="section-sub">v3 を人に見せて「継続して使いたい？」を聞いたら、返ってきた最初の質問は技術の話ではなかった。<br/><b>「Downloads のデータをホームディレクトリの別ディレクトリに移動とかできないの？」</b></p>
     <div class="why-grid">
       <div class="why-card v1">
-        <div class="k">v2 まででは足りなかった</div>
+        <div class="k">v3 で見落としていたこと</div>
         <ul>
-          <li>main.py と helper.py が別フォルダに分かれる</li>
-          <li>HTML と参照している CSS / JS / 画像がバラける</li>
-          <li>消さなくても <b>import が壊れて動かなくなる</b></li>
-          <li>plan を毎回ゼロから書く負担</li>
-          <li>整合性確認は手作業（apply 後ちゃんと動いた？）</li>
+          <li>scan ~/Downloads & --target ~/Documents が <b>動かなかった</b></li>
+          <li>plan の from が相対パスのまま出力 → apply が target からの相対と誤認 → 「ファイルが無い」エラー</li>
+          <li>「便利そう」と「実際に押せる」の間に大きな谷</li>
+          <li>自分が想定したフロー（その場整理 / 集約モード）の外に、ユーザの普通の使い方があった</li>
+          <li>機能の数より「最初の試しが通るか」が継続意思を左右する</li>
         </ul>
       </div>
       <div class="why-card v2">
-        <div class="k">v3 で入れたこと</div>
+        <div class="k">v4 で答えたこと</div>
         <ul>
-          <li><b>依存解析</b>: import / require / src= / @import を読む</li>
-          <li><b>連結クラスタは同じ subfolder に一緒に運ぶ</b></li>
-          <li>クラスタを分断する plan は preview で警告</li>
-          <li><b>suggest</b>: scan.json から baseline plan を自動生成</li>
-          <li><b>verify</b>: apply 直後の整合性チェック / <b>redo</b>: undo の取り消し / Ctrl-C 安全終了</li>
+          <li><b>cross_target</b> 判定を追加（multi_root OR target≠scan_root）</li>
+          <li>該当する場合 from は<b>絶対パス</b>で出力 → apply が正しく解決</li>
+          <li>target 配下のファイルは「移動不要」として skipped へ</li>
+          <li>scan ~/Downloads → suggest --target ~/Documents が <b>普通に動く</b></li>
+          <li>新規テスト追加で永続的に保証（82 → 89 項目）</li>
         </ul>
       </div>
     </div>
@@ -350,6 +370,59 @@
         <div class="log">
           <div class="log-title">操作ログ（manifest）— これがあるから全部戻せる</div>
           <div id="logbox"><div class="log-line"><span class="t">待機中…</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feedback-section">
+  <div class="container">
+    <span class="section-tag">v4 のキモ: リアル価値検証 → 本体修正</span>
+    <h2 class="section-h">「便利そう」と「実際に押せる」の<br/>間にあった、谷を埋めた。</h2>
+    <p class="section-sub">v3 を人に見せて「継続して使いたい？」を聞いた。返ってきたのは技術の話ではなく、<b>普通の使い方</b>についての一言だった。</p>
+
+    <div class="feedback-box">
+      <div class="feedback-quote">
+        <span class="qm">"</span>Downloads のデータをホームディレクトリの別ディレクトリに移動とかできないの？
+      </div>
+
+      <div class="feedback-flow">
+        <div class="fb-step">
+          <div class="fb-num">STEP 1 · 試す</div>
+          <div class="fb-h">v3 で実行 → 失敗</div>
+          <div class="fb-p">scan ~/Downloads & suggest --target ~/Documents で apply まで通そうとした。</div>
+          <span class="fb-code"><span class="err">エラー: 存在しないファイル: photo.png</span></span>
+        </div>
+        <div class="fb-step">
+          <div class="fb-num">STEP 2 · 原因</div>
+          <div class="fb-h">plan の from が相対パス</div>
+          <div class="fb-p">単一 root は無条件で in-place 扱い → from は scan 元への相対。apply は target からの相対と解釈してファイルを見つけられない。</div>
+          <span class="fb-code">"from": "photo.png"  <span class="err">← どこの photo.png?</span></span>
+        </div>
+        <div class="fb-step">
+          <div class="fb-num">STEP 3 · 修正</div>
+          <div class="fb-h">cross_target 判定を追加</div>
+          <div class="fb-p">multi_root OR target≠scan_root のとき consolidate モードで動作。from は絶対パスで出力。</div>
+          <span class="fb-code">"from": "/Users/.../Downloads/photo.png" <span class="ok">✓</span></span>
+        </div>
+      </div>
+
+      <div class="feedback-flow" style="margin-top:14px">
+        <div class="fb-step" style="grid-column:1/-1;border-color:var(--safe);background:rgba(62,224,138,0.05)">
+          <div class="fb-num" style="color:var(--safe)">STEP 4 · v4 で動く</div>
+          <div class="fb-h">scan ~/Downloads → suggest --target ~/Documents → preview → apply</div>
+          <div class="fb-p" style="margin-bottom:8px">Downloads の中身が ~/Documents/コード/、~/Documents/画像/、~/Documents/ドキュメント/メモ/ などに振り分けられる。全部 manifest に記録、undo で完全に元の Downloads に戻る。</div>
+          <span class="fb-code"><span class="ok">完了: 3 件を移動 / 記録: ~/Documents/_整理ログ/manifest-...json</span></span>
+        </div>
+      </div>
+
+      <div class="feedback-flow" style="margin-top:18px">
+        <div class="fb-step" style="grid-column:1/-1;border-style:dashed;background:transparent">
+          <div class="fb-num">テストで永続的に保証</div>
+          <div class="fb-h">t_suggest_cross_target_single_source 追加</div>
+          <div class="fb-p">~/Downloads 想定 → 別 target dir → apply → src 側からの消失 → undo で完全復元、までフルラウンドトリップを検証。テスト 82 → 89 項目。</div>
+          <span class="fb-code">github.com/satoryudev/tidy@<span class="ok">0eb3c5e</span> — fix(suggest): cross-target single-source モードに対応</span>
         </div>
       </div>
     </div>
@@ -414,13 +487,13 @@
 
 <section class="features">
   <div class="container">
-    <span class="section-tag">v3 で動くもの</span>
-    <h2 class="section-h">関係を読む。<br/>関係するものは、一緒に運ぶ。</h2>
+    <span class="section-tag">v4 で動くもの</span>
+    <h2 class="section-h">ユーザの一言に、<br/>本体で答える。</h2>
     <div class="grid">
-      <div class="feat"><div class="num">01 <span style="color:var(--safe)">v3 NEW</span></div><h4>依存解析クラスタ</h4><p>Python の <b>import</b>、JS の <b>require / import</b>、HTML の <b>src= / href=</b>、CSS の <b>@import</b> を読む。連結したファイル群は同じ subfolder へまとめて配置。</p></div>
-      <div class="feat"><div class="num">02 <span style="color:var(--safe)">v3 NEW</span></div><h4>クラスタ分断警告</h4><p>手で plan を編集して main.py と helper.py が別フォルダに分かれたら preview が止める。<b>import が壊れる前に</b>気付ける。</p></div>
-      <div class="feat"><div class="num">03 <span style="color:var(--safe)">v3 NEW</span></div><h4>suggest（自動 baseline）</h4><p>scan.json から plan を自動生成。人 / Claude はゼロから書かず、差分修正だけで済む。</p></div>
-      <div class="feat"><div class="num">04 <span style="color:var(--safe)">v3 NEW</span></div><h4>verify / redo / Ctrl-C 安全終了</h4><p>apply 後の整合性チェック、undo の取り消し、中断時の journal フラッシュ。「やり直し」のすべての方向に答える。</p></div>
+      <div class="feat"><div class="num">01 <span style="color:var(--accent2)">v4 NEW</span></div><h4>Downloads → ホーム配下への振り分け</h4><p>「<b>~/Downloads</b> を ~/Documents の下に振り分けて」が本当に動く。scan の対象と target dir が違うことが自然に検出され、plan の from は絶対パス、target 配下のファイルは自動 skip。</p></div>
+      <div class="feat"><div class="num">02 <span style="color:var(--accent2)">v4 NEW</span></div><h4>cross_target 判定の一般化</h4><p>multi_root だけでなく <b>「単一 root でも target が異なる場合」</b>もまとめて consolidate モードとして扱う。境界条件を1か所に集約してテストで保証。</p></div>
+      <div class="feat"><div class="num">03 <span style="color:var(--safe)">v3〜</span></div><h4>依存解析クラスタ</h4><p>Python の <b>import</b>、JS の <b>require / import</b>、HTML の <b>src= / href=</b>、CSS の <b>@import</b> を読む。連結したファイル群は同じ subfolder へまとめて配置。</p></div>
+      <div class="feat"><div class="num">04 <span style="color:var(--safe)">v3〜</span></div><h4>suggest / verify / redo / Ctrl-C 安全終了</h4><p>scan から plan の自動生成、apply 後の整合性チェック、undo の取り消し、中断時の journal フラッシュ。「やり直し」のすべての方向に答える。</p></div>
       <div class="feat"><div class="num">05</div><h4>削除しない隔離（v2〜）</h4><p>不要・重複ファイルはゴミ箱ではなく <b>_捨て/</b> へ。assess で危険な対象は止める。</p></div>
       <div class="feat"><div class="num">06</div><h4>集約＋重複排除（v2〜）</h4><p>複数の場所に散らばった資料を1か所に集め、同一内容（sha1一致）の重複を1つに絞る。</p></div>
     </div>
@@ -429,39 +502,39 @@
 
 <section class="diff-section">
   <div class="container">
-    <span class="section-tag">v1 → v2 → v3 進化</span>
+    <span class="section-tag">v1 → v2 → v3 → v4 進化</span>
     <h2 class="section-h">何が変わったか。</h2>
     <table class="diff-table">
-      <thead><tr><th>観点</th><th>v1（mock）</th><th>v2（本物）</th><th class="v3-h">v3（NEW）</th></tr></thead>
+      <thead><tr><th>観点</th><th>v1（mock）</th><th>v2（本物）</th><th class="v3-h">v3</th><th class="v4-h">v4（NEW · 価値検証）</th></tr></thead>
       <tbody>
-        <tr><td class="axis">実体</td><td class="v1">見た目だけ・動かない</td><td class="v2">公開スキル tidy・35テスト合格</td><td class="v3"><b>テスト 82 項目</b>合格</td></tr>
-        <tr><td class="axis">分類</td><td class="v1">名前・拡張子・日付</td><td class="v2">中身（スニペット）も読む</td><td class="v3"><b>import / 参照グラフも読む</b></td></tr>
-        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイルずつ分類</td><td class="v3"><b>連結クラスタを一緒に運ぶ</b>（import 破壊なし）</td></tr>
-        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3"><b>suggest が自動生成</b>。人は差分修正のみ</td></tr>
-        <tr><td class="axis">整合性</td><td class="v1">なし</td><td class="v2">自分で目視</td><td class="v3"><b>verify で機械チェック</b>（rc=1 で失敗報告）</td></tr>
-        <tr><td class="axis">やり直し</td><td class="v1">なし</td><td class="v2">undo</td><td class="v3">undo + <b>redo（取り消しの取り消し）</b></td></tr>
-        <tr><td class="axis">中断</td><td class="v1">そのまま終了</td><td class="v2">OSError で停止</td><td class="v3"><b>Ctrl-C 安全終了</b>＋ journal フラッシュ</td></tr>
-        <tr><td class="axis">プレビュー</td><td class="v1">なし</td><td class="v2">件数のみ</td><td class="v3"><b>総サイズ + _捨て隔離サイズ</b></td></tr>
-        <tr><td class="axis">安全性</td><td class="v1">なし</td><td class="v2">隔離＋undo＋assess</td><td class="v3">＋ <b>クラスタ分断警告</b> / <b>自己移動検出</b></td></tr>
+        <tr><td class="axis">テスト</td><td class="v1">なし</td><td class="v2">35 項目</td><td class="v3">82 項目</td><td class="v4"><b>89 項目</b>（cross-target ラウンドトリップ）</td></tr>
+        <tr><td class="axis">Downloads → 別 dir 振り分け</td><td class="v1">該当なし</td><td class="v2">該当なし</td><td class="v3">エラーで動かず</td><td class="v4"><b>素直に動く</b>（scan ~/Downloads / suggest --target ~/Documents）</td></tr>
+        <tr><td class="axis">cross_target 判定</td><td class="v1">—</td><td class="v2">—</td><td class="v3">multi_root のみ</td><td class="v4"><b>multi_root OR target≠scan_root</b> に一般化</td></tr>
+        <tr><td class="axis">plan の from</td><td class="v1">—</td><td class="v2">—</td><td class="v3">単一 root だと相対パス（バグ）</td><td class="v4"><b>cross_target なら絶対パス</b>で出力</td></tr>
+        <tr><td class="axis">分類</td><td class="v1">名前・拡張子</td><td class="v2">中身も読む</td><td class="v3">import / 参照グラフも読む</td><td class="v4">同左</td></tr>
+        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイルずつ</td><td class="v3">連結クラスタを一緒に運ぶ</td><td class="v4">同左</td></tr>
+        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3">suggest が自動生成</td><td class="v4">同左</td></tr>
+        <tr><td class="axis">整合性 / やり直し</td><td class="v1">なし</td><td class="v2">目視 / undo</td><td class="v3">verify / undo + redo / Ctrl-C 安全終了</td><td class="v4">同左</td></tr>
+        <tr><td class="axis">安全性</td><td class="v1">なし</td><td class="v2">隔離＋undo＋assess</td><td class="v3">＋ クラスタ分断警告</td><td class="v4">同左</td></tr>
       </tbody>
     </table>
 
     <div class="vpc-cite">
-      <h5>VPC v1 · Pain → v3 の答え</h5>
+      <h5>VPC v1 · Pain → v4 の答え</h5>
       <blockquote>
-        v1 は <i>見せる</i> だけだった。v2 は <b>怖くないから押せる</b>（消さない・戻せる・見せる）を作った。
-        v3 は <b>関係性も壊さない</b> を入れた — main.py と helper.py、HTML と CSS/JS/画像、それぞれの「束」を
-        ばらさず一緒に運ぶ。<b>整理した結果、動かなくなる</b>のは「壊さない」の盲点だった。
+        v1 は <i>見せる</i>、v2 は <b>怖くないから押せる</b>、v3 は <b>関係性も壊さない</b>を作った。
+        v4 は <b>「あなたの状況で実際に動く」</b>を実装した — ユーザに見せたら出た「Downloads を別フォルダに振り分けたい」
+        という当たり前の要求が、v3 ではエラーで動かなかった。<b>価値検証は「便利か？」より「あなたの状況で実際に動くか？」を見るのが本質</b>。
       </blockquote>
-      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト82項目）</div>
+      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト89項目）</div>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container row">
-    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6</div>
-    <div class="mono">v3.0.0 · prototype</div>
+    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6 · 価値検証</div>
+    <div class="mono">v4.0.0 · prototype</div>
   </div>
 </footer>
 

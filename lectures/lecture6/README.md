@@ -1,88 +1,88 @@
-# Lecture 6 — プロトタイプ v3
+# Lecture 6 — プロトタイプ v4
 
-VPC v1 で構想した **Tidy（AIファイル整理アシスタント）** の「動くプロトタイプ v3」。
-v1 の「見た目だけの mock」→ v2 の「**怖くないから押せる**（消さない・戻せる・見せる）」を経て、
-v3 で **コードファイルを扱えるようになった**。
+VPC v1 で構想した **Tidy（AIファイル整理アシスタント）** の「動くプロトタイプ v4」。
+価値検証回 — **v3 を実際に人に見せて、フィードバックを受け、その場で本体を直して v4 として返した**。
+
+## 進化マップ
+
+| | テーマ | 何で答えたか |
+|---|---|---|
+| v1 | 見栄え（mock） | 静的 HTML デモ |
+| v2 | 信頼性 — 怖くないから押せる | 削除しない・見せてから動く・全部戻せる |
+| v3 | 関係性 — コードを壊さない | import / 参照を解析、連結クラスタを一緒に運ぶ |
+| **v4** | **実用性 — 普通の使い方が普通に動く** | **ユーザに見せたら出た「Downloads を別フォルダへ振り分けたい」を本体で対応** |
 
 ## 成果物
 
 | 形態 | 場所 | 用途 |
 |---|---|---|
-| 🌐 Web プロトタイプ v3 | https://tidy-prototype-v3.vercel.app | 価値を伝えるデモ（Discord 提出用） |
-| 🤖 実装（本物） | https://github.com/satoryudev/tidy | 実際にファイル整理を行う Claude Code Skill（テスト **82 項目** 合格） |
-| 📄 ソースコード | [`prototype/index.html`](./prototype/index.html) | Web プロトタイプ v3 のコード |
-| 🌐 v2（比較用） | https://tidy-prototype-v2.vercel.app | 第6回 v2 のデモ |
-| 🌐 v1（比較用） | https://tidy-prototype-v1.vercel.app | 第5回の mock デモ |
+| 🌐 Web プロトタイプ v4 | https://tidy-prototype-v4.vercel.app | 価値を伝えるデモ（Discord 提出用） |
+| 🤖 実装（本物） | https://github.com/satoryudev/tidy | 実際にファイル整理を行う Claude Code Skill（テスト **89 項目** 合格） |
+| 📄 ソースコード | [`prototype/index.html`](./prototype/index.html) | Web プロトタイプ v4 のコード |
+| 🌐 v3 / v2 / v1 | tidy-prototype-{v3,v2,v1}.vercel.app | 比較用に残置 |
 
-## v2 を使ってみて気づいた違和感（ステップ1）
+## 価値検証で起きたこと（ステップ1〜3）
 
-- v2 は「怖くないから押せる」が完成して、実際に Desktop を整理してみた。安心して動かせた。
-- ところが**コードが入ったフォルダ**に当てると問題が出た: `main.py` と `helper.py` が
-  別の subfolder に振り分けられて、`from helper import x` の **import が壊れた**。
-- 整理した結果ファイルは生きているのに、**プログラムが動かなくなる**。
-  → 「壊さない」の盲点だった。**消さなくても、関係性が切れたら壊れる**。
-- 関連して: 1ファイルずつ plan を手書きするのも辛い。`scan.json` 200行から `plan.json` を
-  作るのに時間がかかる。**baseline を自動生成してほしい**。
+v3 を人に見せて「継続して使いたい？」を聞いた。返ってきた質問:
 
-## v3 で実装したこと（v2 → v3 差分）
+> 「Downloads のデータをホームディレクトリの別のディレクトリに移動とかできないの？」
 
-| 観点 | v2 | v3（新規） |
+これが**普通の人の最初の自然な要求**だった。
+試したら、当時の v3 は **対応していなかった**: `--target` に別 dir を指定して `apply` するとエラーで落ちる。
+plan の `from` が「scan 元への相対パス」のまま出ていて、`apply` が「target からの相対」と解釈してファイルを見つけられない、というバグだった。
+
+**「コードを壊さない」を v3 で謳ったその次の瞬間に、「普通のユースケース」を壊していた**ことが分かった。価値検証の意味そのもの。
+
+## v4 で実装したこと（v3 → v4 差分）
+
+| 観点 | v3 | v4 |
 |---|---|---|
-| コードの扱い | 1ファイルずつ分類 | **依存解析（import/require/src=/href=/@import）→ 連結クラスタを同じ subfolder にまとめて運ぶ** |
-| クラスタ分断防止 | なし | **preview がクラスタ分断/未カバーを検出して警告**（import が壊れる前に止める） |
-| plan の作成 | 手書き or 試行錯誤 | **`suggest` が scan.json から baseline plan を自動生成**。人は差分修正だけ |
-| 整合性 | 自分で確認 | **`verify` で apply 直後に from が消え/to が存在を機械チェック** |
-| やり直し | undo のみ | **`redo` を追加**（undo を取り消して apply 後の状態へ） |
-| 中断 | OSError で停止 | **Ctrl-C を捕まえて安全終了**（journal をフラッシュ・rc=130）→ そのまま undo 可 |
-| プレビュー | 件数のみ | **総サイズ + `_捨て/` への隔離サイズ** を表示 |
-| 自己移動 | apply 時にエラー | **preview で from==to を早期検出** |
-| テスト | 35 項目 | **82 項目**（+47） |
+| Downloads → ホーム配下への振り分け | バグで動かない（実用上は使えない） | **`scan ~/Downloads / suggest --target ~/Documents` で素直に動く** |
+| 単一 root + 別 target の判定 | `multi_root` 限定で判定していた | **`cross_target = multi_root OR (target ≠ scan root)` に一般化** |
+| from 値 | 単一 root のとき強制で相対パス | **cross_target なら絶対パス**（実ファイルの場所を指す） |
+| target 配下スキップ | multi_root だけで実行 | **cross_target で常時実行**（target 内のファイルは「移動不要」として skipped へ） |
+| テスト | 82 項目 | **89 項目**（+7・cross-target 単一ソースのフルラウンドトリップ） |
 
-一言でいうと: **「怖くないから押せる」→「コードでも壊さず動ける」**。
-依存関係を見て関連ファイルを一緒に運ぶ。`scan` → `suggest`（自動 baseline）→ `preview` → `apply` → `verify`。
-途中の Ctrl-C も安全。
+実装: [`satoryudev/tidy@0eb3c5e`](https://github.com/satoryudev/tidy/commit/0eb3c5e)
 
-## 対応する依存元（v3）
-
-- **Python**: `from X import Y`（dot relative + sibling 慣習）/ `import X`
-- **JS/TS/JSX/TSX/MJS/CJS**: `import ... from './X'` / `require('./X')` / 動的 `import('./X')` / 拡張子補完 / `/index.{js,ts,...}`
-- **HTML**: `src=` / `href=` のローカル参照（外部 URL は除外）
-- **CSS/SCSS/SASS**: `@import` / `url(...)`
-- **Markdown**: `![alt](./img.png)` のローカル参照
-- **Shell**: `source ./other.sh` / `. ./other.sh`
-
-外部パッケージ（`react`, `os`, `requests`）は解決不能で自然に除外されるため、誤検出はほぼ無い。
+一言でいうと: **「機能を作る」より「フィードバックを聞いて直す」が価値検証の本体**。
+v3 ではエラーで止まっていた「Downloads の中身をホーム配下のどこかに振り分ける」が、v4 では普通に動く。
 
 ## ローカルで動かす
 
 ```bash
-# Web プロトタイプ v3
+# Web プロトタイプ v4
 open lectures/lecture6/prototype/index.html
 
 # 実装（本物）をインストールして使う
 git clone https://github.com/satoryudev/tidy.git
 ln -s "$(pwd)/tidy" ~/.claude/skills/tidy
-# あとは Claude Code に「このフォルダを整理して」「講義資料をまとめて」と頼む
+# あとは Claude Code に：
+#   「Downloads の中身を Documents の下に振り分けて」
+#   「~/Downloads 整理して、ホーム配下に振り分けて」
+# などと頼むだけ
 ```
 
 ---
 
-## Discord 投稿ドラフト（ステップ5・本人が投稿する）
-
-> ⚠️ ステップ3〜5（**1人以上に見せる → 感想・気付きを記録 → 自分の言葉で投稿**）は
-> 自分自身で行う必要があります。下書きの「見せて得た気付き」は実際に見せてから埋めてください。
+## Discord 投稿ドラフト（ステップ4・本人が投稿する）
 
 ```
-【プロトタイプ v3 / Tidy】
+第9回課題（プロダクト v4 価値検証）
 
-一言ピッチ：v2 は「怖くないから押せる」を作った。v3 は「コードを壊さない」を入れた — import を読むようになり、main.py と helper.py を一緒に運ぶ。82テスト合格。
+【v3 → v4 差分】
+・ユーザに「Downloads の中身をホームディレクトリの別ディレクトリに振り分けたい」と聞かれた → v3 では apply がバグで動かなかった部分を本体で修正
+・suggest の cross_target 判定を multi_root だけでなく「単一 root でも target が異なる場合」に拡張
+・plan の from を絶対パスで出力するロジックを統一（target 配下のファイルは skipped へ）
+・新規テスト t_suggest_cross_target_single_source（〜/Downloads 想定 → 別 target dir → apply → undo の完全ラウンドトリップ）追加
+・テスト 82 → 89 項目（+7）
 
-デプロイURL：https://tidy-prototype-v3.vercel.app
-実装（本物）：https://github.com/satoryudev/tidy
+【継続して使いたいか？に対するフィードバック】
+「Downloads の中身をホームディレクトリの別ディレクトリに移動とかできないの？」── 実際に試してもらったらこれだった。継続利用に必要だったのは「派手な新機能」ではなく「自分の普段のフローに合うか」。v3 はそこを満たせていなかった。
 
-v2 → v3 の差分：依存解析（py/js/html/css/md）→ 連結クラスタを同じ subfolder にまとめる／suggest で baseline plan 自動生成／verify で整合性チェック／redo で undo の取り消し／Ctrl-C で安全終了。
+【得た気づき】
+価値検証は「便利か？」じゃなく「あなたの状況で実際に動くか？」を見るのが本質だと分かった。自分が考えた使い方（その場整理 / 集約モード）の外側に、ユーザの「普通の使い方」があった。コードを書く前に「使ってもらう」を1回入れるだけで、優先順位がガラッと変わる。
 
-見せて得た自分の感想・気付き：（★ここに記入★ — 例：「コードフォルダでも壊れないと分かった瞬間に “普段触れない場所” に手を入れる気になった」「自動 plan があると“まず動かす”心理障壁が下がる」など）
-
-他の受講生への問い：あなたが「自動化したいけど“関係性が切れる”のが怖くて手を出せない」場所はどこですか？
+【URL】
+https://tidy-prototype-v4.vercel.app/
 ```
