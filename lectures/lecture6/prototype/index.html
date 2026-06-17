@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tidy v2 — 信頼できるAIファイル整理</title>
-<meta name="description" content="全自動は、こわい。Tidy v2 は『絶対に消さない・見せてから動く・全部戻せる』を実装した、本当に動くAIファイル整理スキル。散らかって重複した講義資料を1か所に集約。" />
+<title>Tidy v3 — コードを壊さないAIファイル整理</title>
+<meta name="description" content="v2 で『怖くないから押せる』を作った。v3 は『コードを壊さない』を入れた — import を読んで、main.py と helper.py を一緒に運ぶ。Tidy v3。82テスト合格。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -157,6 +157,29 @@
   .log-line { font-family: "JetBrains Mono", monospace; font-size: 11px; color: #b8b8b0; padding: 2px 0; }
   .log-line .t { color: var(--muted); } .log-line .ok { color: var(--safe); } .log-line .q { color: var(--accent2); }
 
+  /* ====== CLUSTER VIZ (v3) ====== */
+  .cluster-section { padding: 80px 0 40px; }
+  .cluster-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+  .cluster-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .cluster-grid { grid-template-columns: 1fr; } }
+  .cluster-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .cluster-card.bad { border-color: var(--accent2); background: rgba(255,90,54,0.05); }
+  .cluster-card.good { border-color: var(--safe); background: rgba(62,224,138,0.05); }
+  .cluster-card .ch { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
+  .cluster-card .ch b { display: block; font-size: 13px; margin-top: 2px; color: var(--fg); text-transform: none; letter-spacing: 0; font-weight: 700; }
+  .cluster-card.bad .ch b { color: var(--accent2); }
+  .cluster-card.good .ch b { color: var(--safe); }
+  .tree { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7; color: #cfcfc8; }
+  .tree .dir { color: var(--accent); }
+  .tree .file { color: #cfcfc8; }
+  .tree .err { color: var(--accent2); }
+  .tree .ok { color: var(--safe); }
+  .tree .indent { color: #555; }
+  .arrow-row { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); margin: 10px 0; padding: 8px 12px; background: #0a0a0a; border-radius: 6px; }
+  .arrow-row .pkg { color: var(--accent); }
+  .arrow-row .broken { color: var(--accent2); }
+  .arrow-row .ok { color: var(--safe); }
+
   /* ====== ASSESS ====== */
   .assess-section { padding: 50px 0; }
   .assess-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
@@ -188,6 +211,9 @@
   .diff-table th { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
   .diff-table td.v1 { color: var(--muted); }
   .diff-table td.v2 { color: var(--fg); }
+  .diff-table td.v3 { color: var(--safe); font-weight: 500; }
+  .diff-table td.v3 b { color: var(--safe); }
+  .diff-table th.v3-h { color: var(--safe); }
   .diff-table tr:last-child td { border-bottom: none; }
   .diff-table .axis { font-weight: 700; }
 
@@ -208,7 +234,7 @@
   <div class="container nav">
     <div class="logo">Tidy<span>.</span></div>
     <div class="nav-right">
-      <span class="badge">PROTOTYPE v2 · 2026-06</span>
+      <span class="badge">PROTOTYPE v3 · 2026-06</span>
       <a class="gh-link" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </div>
@@ -217,55 +243,57 @@
 <section class="hero">
   <div class="container">
     <h1>
-      <span class="strike">全自動で、片づけます。</span><br/>
-      <span class="hl">片づけて、全部戻せます。</span>
+      <span class="strike">片づけたら、import が壊れた。</span><br/>
+      <span class="hl">関係するものは、一緒に運ぶ。</span>
     </h1>
     <p class="lead">
-      ファイル整理アプリが怖いのは、<b>勝手に消される・どこへ行ったか分からなくなる</b>から。
-      <b>Tidy v2</b> は <b>絶対に削除しない（隔離するだけ）</b>・<b>動かす前に必ず見せる</b>・<b>全操作を記録していつでも元に戻せる</b>。
-      散らかって重複した講義資料も、中身を読んで1か所に集約します。
+      v2 で <b>「怖くないから押せる」</b>を作った。コードフォルダに当てたら次の問題が出た:
+      <b>main.py</b> と <b>helper.py</b> が別フォルダに振り分けられて <b>import が壊れた</b>。
+      消さなくても、関係性が切れたら壊れる。<b>Tidy v3</b> は <b>依存関係を読んで</b>、
+      連結しているファイル群を <b>1つのクラスタとして一緒に運ぶ</b>。
     </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト35項目）</a>
-      <a class="btn btn-ghost" href="https://tidy-prototype-v1.vercel.app" target="_blank" rel="noopener">v1（mockデモ）を見る</a>
+      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト82項目）</a>
+      <a class="btn btn-ghost" href="https://tidy-prototype-v2.vercel.app" target="_blank" rel="noopener">v2 を見る</a>
+      <a class="btn btn-ghost" href="https://tidy-prototype-v1.vercel.app" target="_blank" rel="noopener">v1（mock）を見る</a>
     </div>
     <div class="meta-row">
       <span>解決するバグ #18 / ファイル整理が進まない</span>
       <span>実装 / tidy（Claude Code skill）</span>
-      <span>v1 → v2</span>
+      <span>v1 → v2 → v3</span>
     </div>
     <div class="disclaimer">
       ⚠ このページは <b>デモ（UIシミュレーション）です。実際のAPIやファイルシステムは使っていません</b>
       — ボタンの動きはすべてブラウザ内の演出です。<b>本物の実装</b>（実際にファイルを安全に整理する）は
-      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル）の方です。
+      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト82項目合格）の方です。
     </div>
   </div>
 </section>
 
 <section class="why">
   <div class="container">
-    <span class="section-tag">v1 を触り直して気づいたこと</span>
-    <h2 class="section-h">v1 は「賢そう」だった。<br/>でも、信用できなかった。</h2>
-    <p class="section-sub">v1 のデモは見た目は良いが、ボタンを押しても実際には何も起きないmock。もし本当に動いたら、勝手に動かされて怖い。整理ツールに本当に必要なのは「賢さ」より「信頼」だと気づいた。</p>
+    <span class="section-tag">v2 を使ってみて気づいたこと</span>
+    <h2 class="section-h">「消さない」だけでは、<br/>足りなかった。</h2>
+    <p class="section-sub">v2 で「怖くないから押せる」が完成して、実際にコードフォルダに当ててみた。ファイルは生きてる。でも <b>関係性が切れて、プログラムが動かなくなった</b>。「壊さない」の盲点だった。</p>
     <div class="why-grid">
       <div class="why-card v1">
-        <div class="k">v1 の物足りなさ</div>
+        <div class="k">v2 まででは足りなかった</div>
         <ul>
-          <li>実際には動かない（mock UI だけ）</li>
-          <li>名前と拡張子しか見ていない</li>
-          <li>消えたら戻せない・履歴がない</li>
-          <li>1フォルダだけ・重複は印を付けるだけ</li>
-          <li>危険な場所でも平気で動きそうで怖い</li>
+          <li>main.py と helper.py が別フォルダに分かれる</li>
+          <li>HTML と参照している CSS / JS / 画像がバラける</li>
+          <li>消さなくても <b>import が壊れて動かなくなる</b></li>
+          <li>plan を毎回ゼロから書く負担</li>
+          <li>整合性確認は手作業（apply 後ちゃんと動いた？）</li>
         </ul>
       </div>
       <div class="why-card v2">
-        <div class="k">v2 で実装したこと</div>
+        <div class="k">v3 で入れたこと</div>
         <ul>
-          <li>本当に動く（公開スキル・35テスト合格）</li>
-          <li>ファイルの中身を読んで分類</li>
-          <li>削除しない＝<b>_捨て</b>へ隔離。全操作を記録し undo</li>
-          <li>複数の場所から集約＋同一内容の重複を排除</li>
-          <li>assess で危険なフォルダは自動で「やめとけ」</li>
+          <li><b>依存解析</b>: import / require / src= / @import を読む</li>
+          <li><b>連結クラスタは同じ subfolder に一緒に運ぶ</b></li>
+          <li>クラスタを分断する plan は preview で警告</li>
+          <li><b>suggest</b>: scan.json から baseline plan を自動生成</li>
+          <li><b>verify</b>: apply 直後の整合性チェック / <b>redo</b>: undo の取り消し / Ctrl-C 安全終了</li>
         </ul>
       </div>
     </div>
@@ -276,7 +304,7 @@
   <div class="container">
     <span class="section-tag">触れるデモ</span>
     <h2 class="section-h">散らかった講義資料を、安全に集約する。</h2>
-    <p class="section-sub">3か所に散らばって重複した講義PDFを、①診断 → ②プレビュー（まだ動かさない）→ ③実行 → ④元に戻す、の順で。実行しても何ひとつ削除されず、無関係な個人メモは触りません。</p>
+    <p class="section-sub">3か所に散らばって重複した講義PDFを、①診断 → ②プレビュー（まだ動かさない）→ ③実行 → ④元に戻す、の順で。実行しても何ひとつ削除されず、無関係な個人メモは触りません。<br/><span style="color:var(--accent)">※ v3 ではこの上にさらに <b>suggest</b>（plan 自動生成）→ <b>verify</b>（apply 後の整合性チェック）が追加されています。</span></p>
 
     <div class="demo">
       <div class="demo-head">
@@ -310,6 +338,51 @@
   </div>
 </section>
 
+<section class="cluster-section">
+  <div class="container">
+    <span class="section-tag">v3 のキモ: 依存解析クラスタ</span>
+    <h2 class="section-h">import を読むから、<br/>関係するファイルを切り離さない。</h2>
+    <p class="section-sub">scan が各コードファイルを開いて import / require / src= / @import を抽出 → 連結したファイル群を1つのクラスタとして scan.json に記録。suggest はクラスタを尊重して同じ subfolder に配置する。手で plan を変えてクラスタを分断すると preview が止める。</p>
+
+    <div class="cluster-box">
+      <div class="arrow-row">
+        <span class="pkg">main.py</span> ─ <i>from helper import x</i> → <span class="pkg">helper.py</span> ／
+        <span class="pkg">page.html</span> ─ <i>&lt;script src="./app.js"&gt;</i> → <span class="pkg">app.js</span> ─ <i>import './bar'</i> → <span class="pkg">bar.js</span>
+      </div>
+
+      <div class="cluster-grid">
+        <div class="cluster-card bad">
+          <div class="ch">v2 までは… <b>関係を見ずに型で分類 → import 破壊</b></div>
+<pre class="tree"><span class="dir">コード/</span>
+<span class="indent">├</span> <span class="file">main.py</span>     <span class="err">← from helper import x が壊れる</span>
+<span class="indent">├</span> <span class="file">helper.py</span>   <span class="err">← 別の場所へ振り分けられた</span>
+<span class="indent">└</span> <span class="file">page.html</span>   <span class="err">← src="./app.js" が解決できない</span>
+<span class="dir">画像/</span>
+<span class="indent">└</span> <span class="file">logo.png</span>    <span class="err">← page.html から参照されてたのに分離</span></pre>
+        </div>
+        <div class="cluster-card good">
+          <div class="ch">v3 は… <b>クラスタごとに同じ subfolder へ</b></div>
+<pre class="tree"><span class="dir">コード/</span>
+<span class="indent">├</span> <span class="dir">main/</span>           <span class="ok">← クラスタ「main」</span>
+<span class="indent">│</span>  <span class="indent">├</span> <span class="file">main.py</span>
+<span class="indent">│</span>  <span class="indent">├</span> <span class="file">helper.py</span>
+<span class="indent">│</span>  <span class="indent">└</span> <span class="file">utils.py</span>
+<span class="indent">└</span> <span class="dir">page/</span>           <span class="ok">← クラスタ「page」（HTML+CSS+JS+画像が同居）</span>
+<span class="indent"> </span>  <span class="indent">├</span> <span class="file">page.html</span>
+<span class="indent"> </span>  <span class="indent">├</span> <span class="file">app.js</span>
+<span class="indent"> </span>  <span class="indent">├</span> <span class="file">bar.js</span>
+<span class="indent"> </span>  <span class="indent">├</span> <span class="file">style.css</span>
+<span class="indent"> </span>  <span class="indent">└</span> <span class="file">logo.png</span></pre>
+        </div>
+      </div>
+
+      <div class="arrow-row" style="margin-top:18px">
+        対応する依存元: <span class="ok">Python</span>（dot relative + sibling）／ <span class="ok">JS/TS/JSX/TSX</span>（import / require / 動的 import / 拡張子補完）／ <span class="ok">HTML</span>（src/href）／ <span class="ok">CSS</span>（@import / url）／ <span class="ok">Markdown</span>（画像参照）／ <span class="ok">Shell</span>（source）。外部パッケージ（<i>react</i>, <i>os</i>）は解決不能で自然に除外。
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="assess-section">
   <div class="container">
     <span class="section-tag">安全装置: assess（診断）</span>
@@ -324,41 +397,46 @@
 
 <section class="features">
   <div class="container">
-    <span class="section-tag">v2 で動くもの</span>
-    <h2 class="section-h">賢さより、信頼。</h2>
+    <span class="section-tag">v3 で動くもの</span>
+    <h2 class="section-h">関係を読む。<br/>関係するものは、一緒に運ぶ。</h2>
     <div class="grid">
-      <div class="feat"><div class="num">01</div><h4>削除しない隔離</h4><p>不要・重複ファイルはゴミ箱ではなく <b>_捨て/</b> へ移すだけ。消すかどうかは自分で決める。</p></div>
-      <div class="feat"><div class="num">02</div><h4>見せてから動く</h4><p>実行前に必ず全件プレビュー（dry-run）。納得してから実行。勝手に動かさない。</p></div>
-      <div class="feat"><div class="num">03</div><h4>全部戻せる undo</h4><p>すべての移動を manifest に記録。1件ごとに書くので、途中で止まっても復元できる。</p></div>
-      <div class="feat"><div class="num">04</div><h4>中身を見て分類</h4><p>名前や拡張子だけでなくファイルの内容を読み、意味的なフォルダへ振り分ける。</p></div>
-      <div class="feat"><div class="num">05</div><h4>集約＋重複排除</h4><p>複数の場所に散らばった資料を1か所に集め、同一内容（sha1一致）の重複を1つに絞る。</p></div>
-      <div class="feat"><div class="num">06</div><h4>assess で事故防止</h4><p>コードプロジェクトやシステム配下は自動で「手動推奨／触らない」と判定して止める。</p></div>
+      <div class="feat"><div class="num">01 <span style="color:var(--safe)">v3 NEW</span></div><h4>依存解析クラスタ</h4><p>Python の <b>import</b>、JS の <b>require / import</b>、HTML の <b>src= / href=</b>、CSS の <b>@import</b> を読む。連結したファイル群は同じ subfolder へまとめて配置。</p></div>
+      <div class="feat"><div class="num">02 <span style="color:var(--safe)">v3 NEW</span></div><h4>クラスタ分断警告</h4><p>手で plan を編集して main.py と helper.py が別フォルダに分かれたら preview が止める。<b>import が壊れる前に</b>気付ける。</p></div>
+      <div class="feat"><div class="num">03 <span style="color:var(--safe)">v3 NEW</span></div><h4>suggest（自動 baseline）</h4><p>scan.json から plan を自動生成。人 / Claude はゼロから書かず、差分修正だけで済む。</p></div>
+      <div class="feat"><div class="num">04 <span style="color:var(--safe)">v3 NEW</span></div><h4>verify / redo / Ctrl-C 安全終了</h4><p>apply 後の整合性チェック、undo の取り消し、中断時の journal フラッシュ。「やり直し」のすべての方向に答える。</p></div>
+      <div class="feat"><div class="num">05</div><h4>削除しない隔離（v2〜）</h4><p>不要・重複ファイルはゴミ箱ではなく <b>_捨て/</b> へ。assess で危険な対象は止める。</p></div>
+      <div class="feat"><div class="num">06</div><h4>集約＋重複排除（v2〜）</h4><p>複数の場所に散らばった資料を1か所に集め、同一内容（sha1一致）の重複を1つに絞る。</p></div>
     </div>
   </div>
 </section>
 
 <section class="diff-section">
   <div class="container">
-    <span class="section-tag">v1 → v2 差分</span>
+    <span class="section-tag">v1 → v2 → v3 進化</span>
     <h2 class="section-h">何が変わったか。</h2>
     <table class="diff-table">
-      <thead><tr><th>観点</th><th>v1（mock）</th><th>v2（本物）</th></tr></thead>
+      <thead><tr><th>観点</th><th>v1（mock）</th><th>v2（本物）</th><th class="v3-h">v3（NEW）</th></tr></thead>
       <tbody>
-        <tr><td class="axis">実体</td><td class="v1">見た目だけ・動かない</td><td class="v2">公開スキル tidy・35テスト合格</td></tr>
-        <tr><td class="axis">分類</td><td class="v1">名前・拡張子・日付</td><td class="v2">ファイルの中身（スニペット）も読む</td></tr>
-        <tr><td class="axis">安全性</td><td class="v1">なし（消えたら終わり）</td><td class="v2">削除しない隔離＋プレビュー＋undo＋中断耐性</td></tr>
-        <tr><td class="axis">範囲</td><td class="v1">1フォルダ・重複は印だけ</td><td class="v2">複数の場所を集約＋重複を実際に排除</td></tr>
-        <tr><td class="axis">事故防止</td><td class="v1">なし</td><td class="v2">assess で危険な対象を判定して止める</td></tr>
+        <tr><td class="axis">実体</td><td class="v1">見た目だけ・動かない</td><td class="v2">公開スキル tidy・35テスト合格</td><td class="v3"><b>テスト 82 項目</b>合格</td></tr>
+        <tr><td class="axis">分類</td><td class="v1">名前・拡張子・日付</td><td class="v2">中身（スニペット）も読む</td><td class="v3"><b>import / 参照グラフも読む</b></td></tr>
+        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイルずつ分類</td><td class="v3"><b>連結クラスタを一緒に運ぶ</b>（import 破壊なし）</td></tr>
+        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3"><b>suggest が自動生成</b>。人は差分修正のみ</td></tr>
+        <tr><td class="axis">整合性</td><td class="v1">なし</td><td class="v2">自分で目視</td><td class="v3"><b>verify で機械チェック</b>（rc=1 で失敗報告）</td></tr>
+        <tr><td class="axis">やり直し</td><td class="v1">なし</td><td class="v2">undo</td><td class="v3">undo + <b>redo（取り消しの取り消し）</b></td></tr>
+        <tr><td class="axis">中断</td><td class="v1">そのまま終了</td><td class="v2">OSError で停止</td><td class="v3"><b>Ctrl-C 安全終了</b>＋ journal フラッシュ</td></tr>
+        <tr><td class="axis">プレビュー</td><td class="v1">なし</td><td class="v2">件数のみ</td><td class="v3"><b>総サイズ + _捨て隔離サイズ</b></td></tr>
+        <tr><td class="axis">安全性</td><td class="v1">なし</td><td class="v2">隔離＋undo＋assess</td><td class="v3">＋ <b>クラスタ分断警告</b> / <b>自己移動検出</b></td></tr>
       </tbody>
     </table>
 
     <div class="vpc-cite">
-      <h5>VPC v1 · Pain → v2 の答え</h5>
+      <h5>VPC v1 · Pain → v3 の答え</h5>
       <blockquote>
-        「<b>あとで整理しようとして無限にやらない</b>」「<b>どこに保存したか忘れる</b>」「<b>同じファイルが大量に重複</b>」 ──
-        v1 はこれを“見せる”だけだった。v2 は <b>怖くないから実際に押せる</b>（消さない・戻せる・見せる）形で答える。整理が進まない本当の理由は「面倒」より「<b>壊すのが怖い</b>」だった。
+        v1 は <i>見せる</i> だけだった。v2 は <b>怖くないから押せる</b>（消さない・戻せる・見せる）を作った。
+        v3 は <b>関係性も壊さない</b> を入れた — main.py と helper.py、HTML と CSS/JS/画像、それぞれの「束」を
+        ばらさず一緒に運ぶ。<b>整理した結果、動かなくなる</b>のは「壊さない」の盲点だった。
       </blockquote>
-      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy</div>
+      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト82項目）</div>
     </div>
   </div>
 </section>
@@ -366,7 +444,7 @@
 <footer>
   <div class="container row">
     <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6</div>
-    <div class="mono">v2.0.0 · prototype</div>
+    <div class="mono">v3.0.0 · prototype</div>
   </div>
 </footer>
 
