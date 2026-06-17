@@ -160,24 +160,42 @@
   /* ====== CLUSTER VIZ (v3) ====== */
   .cluster-section { padding: 80px 0 40px; }
   .cluster-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+
+  .cl-toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; padding: 6px; background: #0e0e0c; border: 1px solid var(--border); border-radius: 12px; width: fit-content; }
+  .cl-toggle .ct-btn { font-family: "Noto Sans JP", sans-serif; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; background: transparent; color: var(--muted); border: none; transition: all .15s; }
+  .cl-toggle .ct-btn:hover { color: var(--fg); }
+  .cl-toggle .ct-btn.active { color: var(--bg); }
+  .cl-toggle .ct-btn.bad-active { background: var(--accent2); }
+  .cl-toggle .ct-btn.good-active { background: var(--safe); }
+
   .cluster-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
   @media (max-width: 760px) { .cluster-grid { grid-template-columns: 1fr; } }
-  .cluster-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-  .cluster-card.bad { border-color: var(--accent2); background: rgba(255,90,54,0.05); }
-  .cluster-card.good { border-color: var(--safe); background: rgba(62,224,138,0.05); }
+  .cluster-card { border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: border-color .25s; }
   .cluster-card .ch { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px; }
   .cluster-card .ch b { display: block; font-size: 13px; margin-top: 2px; color: var(--fg); text-transform: none; letter-spacing: 0; font-weight: 700; }
-  .cluster-card.bad .ch b { color: var(--accent2); }
-  .cluster-card.good .ch b { color: var(--safe); }
-  .tree { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7; color: #cfcfc8; }
+  .tree { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.7; color: #cfcfc8; margin: 0; }
   .tree .dir { color: var(--accent); }
   .tree .file { color: #cfcfc8; }
   .tree .err { color: var(--accent2); }
   .tree .ok { color: var(--safe); }
   .tree .indent { color: #555; }
-  .arrow-row { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); margin: 10px 0; padding: 8px 12px; background: #0a0a0a; border-radius: 6px; }
-  .arrow-row .pkg { color: var(--accent); }
-  .arrow-row .broken { color: var(--accent2); }
+
+  .src-list { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 1.8; }
+  .src-list .row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 4px; }
+  .src-list .row .ico { width: 16px; }
+  .src-list .row .ref { color: var(--muted); font-size: 10px; margin-left: auto; }
+
+  .status-card { margin-top: 18px; padding: 16px 18px; border-radius: 12px; border: 1px solid var(--border); transition: all .25s; }
+  .status-card.bad { border-color: var(--accent2); background: rgba(255,90,54,0.07); }
+  .status-card.good { border-color: var(--safe); background: rgba(62,224,138,0.07); }
+  .status-card .badge-big { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
+  .status-card.bad .badge-big { background: var(--accent2); color: var(--bg); }
+  .status-card.good .badge-big { background: var(--safe); color: var(--bg); }
+  .status-card .reason { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #c8c8c0; padding-left: 18px; position: relative; line-height: 1.7; }
+  .status-card.bad .reason::before { content: "❌"; position: absolute; left: 0; }
+  .status-card.good .reason::before { content: "✓"; position: absolute; left: 0; color: var(--safe); }
+
+  .arrow-row { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted); margin: 16px 0 0; padding: 10px 14px; background: #0a0a0a; border-radius: 8px; line-height: 1.7; }
   .arrow-row .ok { color: var(--safe); }
 
   /* ====== ASSESS ====== */
@@ -345,38 +363,37 @@
     <p class="section-sub">scan が各コードファイルを開いて import / require / src= / @import を抽出 → 連結したファイル群を1つのクラスタとして scan.json に記録。suggest はクラスタを尊重して同じ subfolder に配置する。手で plan を変えてクラスタを分断すると preview が止める。</p>
 
     <div class="cluster-box">
-      <div class="arrow-row">
-        <span class="pkg">main.py</span> ─ <i>from helper import x</i> → <span class="pkg">helper.py</span> ／
-        <span class="pkg">page.html</span> ─ <i>&lt;script src="./app.js"&gt;</i> → <span class="pkg">app.js</span> ─ <i>import './bar'</i> → <span class="pkg">bar.js</span>
+      <div class="cl-toggle" role="tablist">
+        <button class="ct-btn" id="cl-btn-v2" data-mode="v2">v2 のロジックで整理</button>
+        <button class="ct-btn active good-active" id="cl-btn-v3" data-mode="v3">v3 のロジックで整理</button>
       </div>
 
       <div class="cluster-grid">
-        <div class="cluster-card bad">
-          <div class="ch">v2 までは… <b>関係を見ずに型で分類 → import 破壊</b></div>
-<pre class="tree"><span class="dir">コード/</span>
-<span class="indent">├</span> <span class="file">main.py</span>     <span class="err">← from helper import x が壊れる</span>
-<span class="indent">├</span> <span class="file">helper.py</span>   <span class="err">← 別の場所へ振り分けられた</span>
-<span class="indent">└</span> <span class="file">page.html</span>   <span class="err">← src="./app.js" が解決できない</span>
-<span class="dir">画像/</span>
-<span class="indent">└</span> <span class="file">logo.png</span>    <span class="err">← page.html から参照されてたのに分離</span></pre>
+        <div class="cluster-card">
+          <div class="ch">入力 <b>~/code-mess/（同じ8ファイル）</b></div>
+          <div class="src-list">
+            <div class="row"><span class="ico">🐍</span><span class="file">main.py</span><span class="ref">from helper / from utils</span></div>
+            <div class="row"><span class="ico">🐍</span><span class="file">helper.py</span><span class="ref">—</span></div>
+            <div class="row"><span class="ico">🐍</span><span class="file">utils.py</span><span class="ref">—</span></div>
+            <div class="row"><span class="ico">📄</span><span class="file">page.html</span><span class="ref">src=./app.js / href=./style.css / img=./logo.png</span></div>
+            <div class="row"><span class="ico">🟨</span><span class="file">app.js</span><span class="ref">import './bar'</span></div>
+            <div class="row"><span class="ico">🟨</span><span class="file">bar.js</span><span class="ref">—</span></div>
+            <div class="row"><span class="ico">🎨</span><span class="file">style.css</span><span class="ref">—</span></div>
+            <div class="row"><span class="ico">🖼</span><span class="file">logo.png</span><span class="ref">—</span></div>
+          </div>
         </div>
-        <div class="cluster-card good">
-          <div class="ch">v3 は… <b>クラスタごとに同じ subfolder へ</b></div>
-<pre class="tree"><span class="dir">コード/</span>
-<span class="indent">├</span> <span class="dir">main/</span>           <span class="ok">← クラスタ「main」</span>
-<span class="indent">│</span>  <span class="indent">├</span> <span class="file">main.py</span>
-<span class="indent">│</span>  <span class="indent">├</span> <span class="file">helper.py</span>
-<span class="indent">│</span>  <span class="indent">└</span> <span class="file">utils.py</span>
-<span class="indent">└</span> <span class="dir">page/</span>           <span class="ok">← クラスタ「page」（HTML+CSS+JS+画像が同居）</span>
-<span class="indent"> </span>  <span class="indent">├</span> <span class="file">page.html</span>
-<span class="indent"> </span>  <span class="indent">├</span> <span class="file">app.js</span>
-<span class="indent"> </span>  <span class="indent">├</span> <span class="file">bar.js</span>
-<span class="indent"> </span>  <span class="indent">├</span> <span class="file">style.css</span>
-<span class="indent"> </span>  <span class="indent">└</span> <span class="file">logo.png</span></pre>
+        <div class="cluster-card" id="cl-result-card">
+          <div class="ch">結果 <b id="cl-result-h">v3 ロジック: クラスタごとに同じ subfolder へ</b></div>
+          <pre class="tree" id="cl-result-tree"></pre>
         </div>
       </div>
 
-      <div class="arrow-row" style="margin-top:18px">
+      <div class="status-card good" id="cl-status">
+        <span class="badge-big" id="cl-status-badge">imports OK · 0 件壊れる</span>
+        <div class="reason" id="cl-status-reason">v3: 連結したファイル群を1つのクラスタとして同じ subfolder に集める。<br/>全ての import / src= / @import が解決される。</div>
+      </div>
+
+      <div class="arrow-row">
         対応する依存元: <span class="ok">Python</span>（dot relative + sibling）／ <span class="ok">JS/TS/JSX/TSX</span>（import / require / 動的 import / 拡張子補完）／ <span class="ok">HTML</span>（src/href）／ <span class="ok">CSS</span>（@import / url）／ <span class="ok">Markdown</span>（画像参照）／ <span class="ok">Shell</span>（source）。外部パッケージ（<i>react</i>, <i>os</i>）は解決不能で自然に除外。
       </div>
     </div>
@@ -603,6 +620,81 @@
   }
   document.querySelectorAll("#assess-choices .chip").forEach(c => c.onclick = () => showVerdict(targets[+c.dataset.i], c));
   showVerdict(targets[0], document.querySelector("#assess-choices .chip"));
+
+  // ============ v3 クラスタ デモ (toggle) ============
+  // 静的なツリー出力。意味的に v2 = 型で分割（→ import 破壊）、v3 = クラスタ単位で同居（→ 解決）。
+  const CL_RESULTS = {
+    v2: {
+      headline: "v2 ロジック: 関係を見ずに型で分類",
+      tree: [
+        '<span class="dir">コード/</span>',
+        '<span class="indent">├</span> <span class="file">main.py</span>     <span class="ok">← helper.py と同じ dir で import OK</span>',
+        '<span class="indent">├</span> <span class="file">helper.py</span>',
+        '<span class="indent">├</span> <span class="file">utils.py</span>',
+        '<span class="indent">├</span> <span class="file">app.js</span>',
+        '<span class="indent">├</span> <span class="file">bar.js</span>',
+        '<span class="indent">└</span> <span class="file">style.css</span>',
+        '<span class="dir">ドキュメント/</span>',
+        '<span class="indent">└</span> <span class="file">page.html</span>   <span class="err">← src="./app.js" 解決不能</span>',
+        '<span class="dir">画像/</span>',
+        '<span class="indent">└</span> <span class="file">logo.png</span>    <span class="err">← page.html の &lt;img&gt; から見えない</span>',
+      ].join("\n"),
+      broken: 3,
+      reasons: [
+        '<b>page.html → ./app.js</b>: HTML は ドキュメント/、JS は コード/ で別 dir → 相対パスが解決できない',
+        '<b>page.html → ./style.css</b>: HTML と CSS が別 dir',
+        '<b>page.html → ./logo.png</b>: 画像/ に切り離されて参照不能',
+      ],
+      cardClass: "bad",
+      btnVar: "bad",
+    },
+    v3: {
+      headline: "v3 ロジック: クラスタごとに同じ subfolder へ",
+      tree: [
+        '<span class="dir">コード/</span>',
+        '<span class="indent">├</span> <span class="dir">main/</span>           <span class="ok">← クラスタ「main」</span>',
+        '<span class="indent">│</span>  <span class="indent">├</span> <span class="file">main.py</span>',
+        '<span class="indent">│</span>  <span class="indent">├</span> <span class="file">helper.py</span>',
+        '<span class="indent">│</span>  <span class="indent">└</span> <span class="file">utils.py</span>',
+        '<span class="indent">└</span> <span class="dir">page/</span>           <span class="ok">← クラスタ「page」(HTML+CSS+JS+画像)</span>',
+        '<span class="indent"> </span>  <span class="indent">├</span> <span class="file">page.html</span>',
+        '<span class="indent"> </span>  <span class="indent">├</span> <span class="file">app.js</span>',
+        '<span class="indent"> </span>  <span class="indent">├</span> <span class="file">bar.js</span>',
+        '<span class="indent"> </span>  <span class="indent">├</span> <span class="file">style.css</span>',
+        '<span class="indent"> </span>  <span class="indent">└</span> <span class="file">logo.png</span>',
+      ].join("\n"),
+      broken: 0,
+      reasons: [
+        '依存解析で <b>main / helper / utils</b> と <b>page / app / bar / style / logo</b> の2クラスタを検出',
+        '同じ subfolder に集めるので、相対パスがそのまま生きる',
+      ],
+      cardClass: "good",
+      btnVar: "good",
+    },
+  };
+
+  function clRender(mode) {
+    const r = CL_RESULTS[mode];
+    document.getElementById("cl-result-h").textContent = r.headline;
+    document.getElementById("cl-result-tree").innerHTML = r.tree;
+    const status = document.getElementById("cl-status");
+    status.classList.remove("bad", "good");
+    status.classList.add(r.cardClass);
+    document.getElementById("cl-status-badge").textContent =
+      r.broken === 0 ? "imports OK · 0 件壊れる" : `imports NG · ${r.broken} 件の import が壊れる`;
+    document.getElementById("cl-status-reason").innerHTML = r.reasons.map(s => s).join("<br/>");
+    // ボタン active 状態
+    document.querySelectorAll(".cl-toggle .ct-btn").forEach(b => {
+      b.classList.remove("active", "bad-active", "good-active");
+      if (b.dataset.mode === mode) {
+        b.classList.add("active", `${r.btnVar}-active`);
+      }
+    });
+  }
+  document.querySelectorAll(".cl-toggle .ct-btn").forEach(b => {
+    b.onclick = () => clRender(b.dataset.mode);
+  });
+  clRender("v3");  // v3 を初期表示（ヘッドライン機能）
 </script>
 </body>
 </html>
