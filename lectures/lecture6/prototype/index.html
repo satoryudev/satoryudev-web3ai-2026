@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tidy v4 — 価値検証で見つけた「普通に使える」</title>
-<meta name="description" content="v3 を人に見せたら最初の質問は『Downloads を別フォルダへ振り分けたい』だった。当時の v3 は対応していなかった。v4 はその場で本体を直して『普通の使い方が普通に動く』を実装。Tidy v4。89テスト合格。" />
+<title>Tidy v5 — 安全に貯めたものを、自分で完結できる</title>
+<meta name="description" content="v4 で「普通の使い方が普通に動く」を作った。v5 は『_捨て にどんどん溜まる気がする、後で見返したり片付けたりしたい』に答えた。review サブコマンドで一覧 / 復元 / 物理削除まで自分で完結できる。Tidy v5。105テスト合格。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -250,6 +250,9 @@
   .diff-table td.v4 { color: var(--accent2); font-weight: 500; }
   .diff-table td.v4 b { color: var(--accent2); }
   .diff-table th.v4-h { color: var(--accent2); }
+  .diff-table td.v5 { color: var(--accent); font-weight: 600; }
+  .diff-table td.v5 b { color: var(--accent); }
+  .diff-table th.v5-h { color: var(--accent); }
   .diff-table tr:last-child td { border-bottom: none; }
   .diff-table .axis { font-weight: 700; }
 
@@ -270,7 +273,7 @@
   <div class="container nav">
     <div class="logo">Tidy<span>.</span></div>
     <div class="nav-right">
-      <span class="badge">PROTOTYPE v4 · 2026-06 · 価値検証</span>
+      <span class="badge">PROTOTYPE v5 · 2026-06 · 継続利用</span>
       <a class="gh-link" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </div>
@@ -279,18 +282,20 @@
 <section class="hero">
   <div class="container">
     <h1>
-      <span class="strike">「便利そう」では、使われない。</span><br/>
-      <span class="hl">「普通の使い方」が、普通に動く。</span>
+      <span class="strike">「削除しない」だけでは、続かない。</span><br/>
+      <span class="hl">貯めたものを、自分で完結できる。</span>
     </h1>
     <p class="lead">
-      v3 を人に見せて <b>「継続して使いたい？」</b>を聞いた。返ってきた最初の質問は
-      <b>「Downloads のデータをホームディレクトリの別ディレクトリに移動とかできないの？」</b>。
-      試したら、当時の v3 はエラーで動かなかった。<b>Tidy v4</b> は その場で本体を直し、
-      <b>scan ~/Downloads → suggest --target ~/Documents が素直に動く</b> ようにした。
-      「コードを壊さない」を v3 で謳ったその次の瞬間に、<b>普通のユースケース</b>を壊していた。
+      v4 で <b>「普通の使い方が普通に動く」</b>を作って、また使ってもらった。次に出てきた声は
+      <b>「_捨て にどんどん溜まる気がする。後で見返したり片付けたりするフローが欲しい」</b>。
+      v2 から「削除しない代わりに隔離する」を貫いてきた裏返しだった。
+      <b>Tidy v5</b> は <b>review サブコマンド</b>で「`_捨て/` の中身を一覧 →
+      パターンで復元 → 古いものだけ物理削除」までを完結させる。
+      tidy 唯一の delete 経路、必ず <code>--yes</code> ゲート付き、不可逆動作は dry-run でまず提示する。
     </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト89項目）</a>
+      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト105項目）</a>
+      <a class="btn btn-ghost" href="https://tidy-prototype-v4.vercel.app" target="_blank" rel="noopener">v4 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v3.vercel.app" target="_blank" rel="noopener">v3 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v2.vercel.app" target="_blank" rel="noopener">v2 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v1.vercel.app" target="_blank" rel="noopener">v1（mock）を見る</a>
@@ -298,40 +303,41 @@
     <div class="meta-row">
       <span>解決するバグ #18 / ファイル整理が進まない</span>
       <span>実装 / tidy（Claude Code skill）</span>
-      <span>v1 → v2 → v3 → v4（価値検証）</span>
+      <span>v1 → v2 → v3 → v4 → v5（継続利用）</span>
     </div>
     <div class="disclaimer">
       ⚠ このページは <b>デモ（UIシミュレーション）です。実際のAPIやファイルシステムは使っていません</b>
       — ボタンの動きはすべてブラウザ内の演出です。<b>本物の実装</b>（実際にファイルを安全に整理する）は
-      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト89項目合格）の方です。
+      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト105項目合格）の方です。
     </div>
   </div>
 </section>
 
 <section class="why">
   <div class="container">
-    <span class="section-tag">v3 を見せて聞いた「継続して使いたい？」</span>
-    <h2 class="section-h">「派手な新機能」じゃなく、<br/>「自分の普段のフロー」が動くか。</h2>
-    <p class="section-sub">v3 を人に見せて「継続して使いたい？」を聞いたら、返ってきた最初の質問は技術の話ではなかった。<br/><b>「Downloads のデータをホームディレクトリの別ディレクトリに移動とかできないの？」</b></p>
+    <span class="section-tag">第8回インタビューから派生した second-order feedback</span>
+    <h2 class="section-h">「削除しない」の次に来た、<br/>「貯めたものをどう扱うか」。</h2>
+    <p class="section-sub">v4 で「普通の使い方が普通に動く」を作って、また使ってもらった。最初の感動の次に出てきたのは、運用の声だった。<br/><b>「_捨て にどんどん溜まる気がする。後で見返したり片付けたりするフローが欲しい」</b></p>
     <div class="why-grid">
       <div class="why-card v1">
-        <div class="k">v3 で見落としていたこと</div>
+        <div class="k">v4 までは足りなかった</div>
         <ul>
-          <li>scan ~/Downloads & --target ~/Documents が <b>動かなかった</b></li>
-          <li>plan の from が相対パスのまま出力 → apply が target からの相対と誤認 → 「ファイルが無い」エラー</li>
-          <li>「便利そう」と「実際に押せる」の間に大きな谷</li>
-          <li>自分が想定したフロー（その場整理 / 集約モード）の外に、ユーザの普通の使い方があった</li>
-          <li>機能の数より「最初の試しが通るか」が継続意思を左右する</li>
+          <li>「削除しない＝<b>_捨て/</b> に隔離する」を v2 から徹底してきた</li>
+          <li>でも <b>_捨て/ が溜まっていくケア</b>が無かった</li>
+          <li>何が入ったか / いつ入ったか / 元はどこだったか、後で辿る手段なし</li>
+          <li>「安全に貯める」と「貯めっぱなしになる」は紙一重</li>
+          <li>結果: <b>「いつか溢れる予感」</b>が継続利用の不安として残る</li>
         </ul>
       </div>
       <div class="why-card v2">
-        <div class="k">v4 で答えたこと</div>
+        <div class="k">v5 で答えたこと</div>
         <ul>
-          <li><b>cross_target</b> 判定を追加（multi_root OR target≠scan_root）</li>
-          <li>該当する場合 from は<b>絶対パス</b>で出力 → apply が正しく解決</li>
-          <li>target 配下のファイルは「移動不要」として skipped へ</li>
-          <li>scan ~/Downloads → suggest --target ~/Documents が <b>普通に動く</b></li>
-          <li>新規テスト追加で永続的に保証（82 → 89 項目）</li>
+          <li><b>review サブコマンド</b>: <b>_捨て/</b> の中身を一覧（隔離日時・元の場所・理由）</li>
+          <li><code>--restore "*.pdf" --yes</code> で pattern 復元（apply と同じ衝突回避）</li>
+          <li><code>--purge --older-than 30 --yes</code> で<b>古いものだけ物理削除</b>（tidy 唯一の delete 経路）</li>
+          <li>不可逆動作は dry-run で件数とサイズだけ提示 → <code>--yes</code> 必須</li>
+          <li><b>preview にサマリ行を追加</b>: 「コード/ 4件 / ドキュメント/ 12件 / _捨て/ 5件」を1行で</li>
+          <li>新規テスト追加で永続的に保証（89 → 105 項目）</li>
         </ul>
       </div>
     </div>
@@ -429,6 +435,50 @@
   </div>
 </section>
 
+<section class="feedback-section">
+  <div class="container">
+    <span class="section-tag">v5 のキモ: review — _捨て の lifecycle</span>
+    <h2 class="section-h">「削除しない」を貫いた先の、<br/>運用の不安に答える。</h2>
+    <p class="section-sub">v2 から「削除しない代わりに <b>_捨て/</b> に隔離する」を貫いてきた。v4 を使ってもらった次に出てきたのは、その帰結への不安だった。</p>
+
+    <div class="feedback-box">
+      <div class="feedback-quote">
+        <span class="qm">"</span>_捨て にどんどん溜まる気がする。後で見返したり片付けたりするフローが欲しい
+      </div>
+
+      <div class="feedback-flow">
+        <div class="fb-step">
+          <div class="fb-num">review</div>
+          <div class="fb-h">一覧 — 来歴つきで全部見える</div>
+          <div class="fb-p">manifest を横断して、各ファイルの隔離日時・元の場所・理由・経過日数を辞書化して表示。manifest 未追跡（手で置かれた）も別表記で区別。</div>
+          <span class="fb-code"><span class="ok">tidy review ~/Documents</span><br/>.DS_Store  (0 B, 3d 前)<br/>&nbsp;&nbsp;理由: システム生成ファイル<br/>&nbsp;&nbsp;元の場所: ~/Downloads/.DS_Store</span>
+        </div>
+        <div class="fb-step">
+          <div class="fb-num">review --restore</div>
+          <div class="fb-h">復元 — pattern で個別に戻す</div>
+          <div class="fb-p">glob 一致の隔離ファイルを manifest の from に従って元の場所へ。apply と同じ衝突回避（dedupe rename）。<code>--yes</code> 必須、無しなら dry-run。</div>
+          <span class="fb-code"><span class="ok">tidy review ~/Documents --restore "*.pdf" --yes</span><br/>復元完了: 3 件を元の場所へ戻しました。</span>
+        </div>
+        <div class="fb-step">
+          <div class="fb-num">review --purge</div>
+          <div class="fb-h">物理削除 — 古いものだけ、明示の同意で</div>
+          <div class="fb-p"><b>tidy 唯一の delete 経路</b>。<code>--older-than DAYS</code> で日数より古いものだけ対象。<code>--yes</code> 必須、無しなら件数とサイズだけ提示して停止。purge ログを別ファイルに残す。</div>
+          <span class="fb-code"><span class="ok">tidy review ~/Documents --purge --older-than 30 --yes</span><br/>物理削除: 12 件 (4.2 MB)<br/>記録: ~/Documents/_整理ログ/purge-...jsonl</span>
+        </div>
+      </div>
+
+      <div class="feedback-flow" style="margin-top:14px">
+        <div class="fb-step" style="grid-column:1/-1;border-color:var(--safe);background:rgba(62,224,138,0.05)">
+          <div class="fb-num" style="color:var(--safe)">継続利用へのループが閉じた</div>
+          <div class="fb-h">整理 → 確認 → 片付け、すべて自分で完結できる</div>
+          <div class="fb-p" style="margin-bottom:8px">apply（v2〜）→ verify（v3〜）→ undo / redo（v3〜）→ <b>review / restore / purge（v5）</b>。「削除しない」「戻せる」「貯めたものを自分で扱える」のセット。すべて manifest と journal に記録されるので、後から「誰が・いつ・何を・なぜ動かしたか」を辿れる。</div>
+          <span class="fb-code">github.com/satoryudev/tidy@<span class="ok">3a71b8f</span> — Add review subcommand + preview summary header (v5) / テスト 89 → 105 項目</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="cluster-section">
   <div class="container">
     <span class="section-tag">v3 のキモ: 依存解析クラスタ</span>
@@ -487,54 +537,55 @@
 
 <section class="features">
   <div class="container">
-    <span class="section-tag">v4 で動くもの</span>
-    <h2 class="section-h">ユーザの一言に、<br/>本体で答える。</h2>
+    <span class="section-tag">v5 で動くもの</span>
+    <h2 class="section-h">貯めたものを、<br/>自分で完結できる。</h2>
     <div class="grid">
-      <div class="feat"><div class="num">01 <span style="color:var(--accent2)">v4 NEW</span></div><h4>Downloads → ホーム配下への振り分け</h4><p>「<b>~/Downloads</b> を ~/Documents の下に振り分けて」が本当に動く。scan の対象と target dir が違うことが自然に検出され、plan の from は絶対パス、target 配下のファイルは自動 skip。</p></div>
-      <div class="feat"><div class="num">02 <span style="color:var(--accent2)">v4 NEW</span></div><h4>cross_target 判定の一般化</h4><p>multi_root だけでなく <b>「単一 root でも target が異なる場合」</b>もまとめて consolidate モードとして扱う。境界条件を1か所に集約してテストで保証。</p></div>
-      <div class="feat"><div class="num">03 <span style="color:var(--safe)">v3〜</span></div><h4>依存解析クラスタ</h4><p>Python の <b>import</b>、JS の <b>require / import</b>、HTML の <b>src= / href=</b>、CSS の <b>@import</b> を読む。連結したファイル群は同じ subfolder へまとめて配置。</p></div>
-      <div class="feat"><div class="num">04 <span style="color:var(--safe)">v3〜</span></div><h4>suggest / verify / redo / Ctrl-C 安全終了</h4><p>scan から plan の自動生成、apply 後の整合性チェック、undo の取り消し、中断時の journal フラッシュ。「やり直し」のすべての方向に答える。</p></div>
-      <div class="feat"><div class="num">05</div><h4>削除しない隔離（v2〜）</h4><p>不要・重複ファイルはゴミ箱ではなく <b>_捨て/</b> へ。assess で危険な対象は止める。</p></div>
-      <div class="feat"><div class="num">06</div><h4>集約＋重複排除（v2〜）</h4><p>複数の場所に散らばった資料を1か所に集め、同一内容（sha1一致）の重複を1つに絞る。</p></div>
+      <div class="feat"><div class="num">01 <span style="color:var(--accent2)">v5 NEW</span></div><h4>review — _捨て の見回り</h4><p><code>review &lt;dir&gt;</code> で隔離ファイルを一覧（<b>隔離日時・元の場所・理由</b>）。manifest を横断して、現在 _捨て に居る各ファイルの来歴を辞書化。</p></div>
+      <div class="feat"><div class="num">02 <span style="color:var(--accent2)">v5 NEW</span></div><h4>パターン復元 / 物理削除</h4><p><code>--restore "*.pdf" --yes</code> で元の場所に戻す。<code>--purge --older-than 30 --yes</code> で古いものだけ物理削除。<b>tidy 唯一の delete 経路</b>、不可逆動作は dry-run で件数 + サイズだけ提示。</p></div>
+      <div class="feat"><div class="num">03 <span style="color:var(--accent2)">v5 NEW</span></div><h4>preview サマリ行</h4><p>「<b>サマリ: コード/ 4件 / ドキュメント/ 12件 / _捨て/ 5件</b>」を移動予定行の直下に表示。100件規模の plan でも「どこに何件行くか」が一目で分かる。</p></div>
+      <div class="feat"><div class="num">04 <span style="color:var(--accent2)">v4〜</span></div><h4>Downloads → ホーム配下への振り分け</h4><p>scan ~/Downloads / suggest --target ~/Documents が素直に動く。cross_target 判定を「単一 root でも target が異なる場合」に拡張。</p></div>
+      <div class="feat"><div class="num">05 <span style="color:var(--safe)">v3〜</span></div><h4>依存解析クラスタ</h4><p>Python の <b>import</b>、JS の <b>require / import</b>、HTML の <b>src= / href=</b>、CSS の <b>@import</b> を読む。連結したファイル群は同じ subfolder へまとめて配置。</p></div>
+      <div class="feat"><div class="num">06</div><h4>削除しない隔離 + suggest / verify / redo（v2〜）</h4><p>不要・重複ファイルは <b>_捨て/</b> へ、assess で危険な対象は止める。plan は scan から自動生成、apply 後の整合性チェック、undo / redo / Ctrl-C 安全終了で「やり直し」のすべての方向に対応。</p></div>
     </div>
   </div>
 </section>
 
 <section class="diff-section">
   <div class="container">
-    <span class="section-tag">v1 → v2 → v3 → v4 進化</span>
+    <span class="section-tag">v1 → v2 → v3 → v4 → v5 進化</span>
     <h2 class="section-h">何が変わったか。</h2>
     <table class="diff-table">
-      <thead><tr><th>観点</th><th>v1（mock）</th><th>v2（本物）</th><th class="v3-h">v3</th><th class="v4-h">v4（NEW · 価値検証）</th></tr></thead>
+      <thead><tr><th>観点</th><th>v1</th><th>v2</th><th class="v3-h">v3</th><th class="v4-h">v4</th><th class="v5-h">v5（NEW · 継続利用）</th></tr></thead>
       <tbody>
-        <tr><td class="axis">テスト</td><td class="v1">なし</td><td class="v2">35 項目</td><td class="v3">82 項目</td><td class="v4"><b>89 項目</b>（cross-target ラウンドトリップ）</td></tr>
-        <tr><td class="axis">Downloads → 別 dir 振り分け</td><td class="v1">該当なし</td><td class="v2">該当なし</td><td class="v3">エラーで動かず</td><td class="v4"><b>素直に動く</b>（scan ~/Downloads / suggest --target ~/Documents）</td></tr>
-        <tr><td class="axis">cross_target 判定</td><td class="v1">—</td><td class="v2">—</td><td class="v3">multi_root のみ</td><td class="v4"><b>multi_root OR target≠scan_root</b> に一般化</td></tr>
-        <tr><td class="axis">plan の from</td><td class="v1">—</td><td class="v2">—</td><td class="v3">単一 root だと相対パス（バグ）</td><td class="v4"><b>cross_target なら絶対パス</b>で出力</td></tr>
-        <tr><td class="axis">分類</td><td class="v1">名前・拡張子</td><td class="v2">中身も読む</td><td class="v3">import / 参照グラフも読む</td><td class="v4">同左</td></tr>
-        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイルずつ</td><td class="v3">連結クラスタを一緒に運ぶ</td><td class="v4">同左</td></tr>
-        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3">suggest が自動生成</td><td class="v4">同左</td></tr>
-        <tr><td class="axis">整合性 / やり直し</td><td class="v1">なし</td><td class="v2">目視 / undo</td><td class="v3">verify / undo + redo / Ctrl-C 安全終了</td><td class="v4">同左</td></tr>
-        <tr><td class="axis">安全性</td><td class="v1">なし</td><td class="v2">隔離＋undo＋assess</td><td class="v3">＋ クラスタ分断警告</td><td class="v4">同左</td></tr>
+        <tr><td class="axis">テスト</td><td class="v1">なし</td><td class="v2">35</td><td class="v3">82</td><td class="v4">89</td><td class="v5"><b>105 項目</b>（review 含む）</td></tr>
+        <tr><td class="axis">_捨て/ の見回り</td><td class="v1">—</td><td class="v2">隔離はする</td><td class="v3">同左</td><td class="v4">同左</td><td class="v5"><b>review</b> で一覧（隔離日時・元の場所・理由）</td></tr>
+        <tr><td class="axis">復元</td><td class="v1">—</td><td class="v2">undo（全件）</td><td class="v3">undo + redo</td><td class="v4">同左</td><td class="v5">＋ <b>review --restore "*.pdf"</b>（pattern 指定で個別復元）</td></tr>
+        <tr><td class="axis">物理削除</td><td class="v1">—</td><td class="v2">行わない</td><td class="v3">行わない</td><td class="v4">行わない</td><td class="v5"><b>review --purge --older-than 30 --yes</b>（唯一の delete 経路）</td></tr>
+        <tr><td class="axis">preview</td><td class="v1">なし</td><td class="v2">件数のみ</td><td class="v3">＋ 総サイズ</td><td class="v4">＋ クラスタ警告</td><td class="v5">＋ <b>サマリ行</b>「コード/ 4件 / ドキュメント/ 12件 / _捨て/ 5件」</td></tr>
+        <tr><td class="axis">Downloads → 別 dir</td><td class="v1">—</td><td class="v2">—</td><td class="v3">エラーで動かず</td><td class="v4"><b>動く</b>（cross_target）</td><td class="v5">同左</td></tr>
+        <tr><td class="axis">分類</td><td class="v1">名前・拡張子</td><td class="v2">中身も読む</td><td class="v3">import / 参照も読む</td><td class="v4">同左</td><td class="v5">同左</td></tr>
+        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイル単位</td><td class="v3">連結クラスタを一緒に</td><td class="v4">同左</td><td class="v5">同左</td></tr>
+        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3">suggest が自動</td><td class="v4">同左</td><td class="v5">同左</td></tr>
       </tbody>
     </table>
 
     <div class="vpc-cite">
-      <h5>VPC v1 · Pain → v4 の答え</h5>
+      <h5>VPC v1 · Pain → v5 の答え</h5>
       <blockquote>
-        v1 は <i>見せる</i>、v2 は <b>怖くないから押せる</b>、v3 は <b>関係性も壊さない</b>を作った。
-        v4 は <b>「あなたの状況で実際に動く」</b>を実装した — ユーザに見せたら出た「Downloads を別フォルダに振り分けたい」
-        という当たり前の要求が、v3 ではエラーで動かなかった。<b>価値検証は「便利か？」より「あなたの状況で実際に動くか？」を見るのが本質</b>。
+        v1 は <i>見せる</i>、v2 は <b>怖くないから押せる</b>、v3 は <b>関係性も壊さない</b>、v4 は <b>普通の使い方が普通に動く</b>を作った。
+        v5 は <b>「貯めたものを自分で完結できる」</b>を実装した — 「<b>削除しない</b>」を貫いた先に「<b>_捨て にどんどん溜まる</b>」という運用の不安があった。
+        review で一覧 → 復元 → 古いものだけ物理削除、までを <code>--yes</code> ゲート付きで自分で完結できる。
+        <b>継続利用は「派手な新機能」より「自分の普段のフローが普通に動くか / 安全に貯めたものを自分で片付けられるか」のセット</b>。
       </blockquote>
-      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト89項目）</div>
+      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト105項目）</div>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container row">
-    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6 · 価値検証</div>
-    <div class="mono">v4.0.0 · prototype</div>
+    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6 · 継続利用</div>
+    <div class="mono">v5.0.0 · prototype</div>
   </div>
 </footer>
 
