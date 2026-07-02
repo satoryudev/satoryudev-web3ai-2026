@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tidy v5 — 安全に貯めたものを、自分で完結できる</title>
-<meta name="description" content="v4 で「普通の使い方が普通に動く」を作った。v5 は『_捨て にどんどん溜まる気がする、後で見返したり片付けたりしたい』に答えた。review サブコマンドで一覧 / 復元 / 物理削除まで自分で完結できる。Tidy v5。105テスト合格。" />
+<title>Tidy v6 — どこを・いつ整理したか、1本で辿れる</title>
+<meta name="description" content="v5 で捨て箱を片付けられるようにした。v6 は『複数の場所を整理すると、どこを・いつ・何を動かしたか分からなくなる』に答えた。history サブコマンドで全ての場所の操作を1本のタイムラインに集約。Tidy v6。114テスト合格。" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -250,9 +250,12 @@
   .diff-table td.v4 { color: var(--accent2); font-weight: 500; }
   .diff-table td.v4 b { color: var(--accent2); }
   .diff-table th.v4-h { color: var(--accent2); }
-  .diff-table td.v5 { color: var(--accent); font-weight: 600; }
-  .diff-table td.v5 b { color: var(--accent); }
-  .diff-table th.v5-h { color: var(--accent); }
+  .diff-table td.v5 { color: var(--fg); font-weight: 500; }
+  .diff-table td.v5 b { color: var(--fg); }
+  .diff-table th.v5-h { color: var(--fg); }
+  .diff-table td.v6 { color: var(--accent); font-weight: 700; }
+  .diff-table td.v6 b { color: var(--accent); }
+  .diff-table th.v6-h { color: var(--accent); }
   .diff-table tr:last-child td { border-bottom: none; }
   .diff-table .axis { font-weight: 700; }
 
@@ -273,7 +276,7 @@
   <div class="container nav">
     <div class="logo">Tidy<span>.</span></div>
     <div class="nav-right">
-      <span class="badge">PROTOTYPE v5 · 2026-06 · 継続利用</span>
+      <span class="badge">PROTOTYPE v6 · 2026-06 · 一望性</span>
       <a class="gh-link" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
   </div>
@@ -282,62 +285,62 @@
 <section class="hero">
   <div class="container">
     <h1>
-      <span class="strike">「削除しない」だけでは、続かない。</span><br/>
-      <span class="hl">貯めたものを、自分で完結できる。</span>
+      <span class="strike">整理したのは、どこだっけ。</span><br/>
+      <span class="hl">全部の整理が、1本の履歴に。</span>
     </h1>
     <p class="lead">
-      v4 で <b>「普通の使い方が普通に動く」</b>を作って、また使ってもらった。次に出てきた声は
-      <b>「_捨て にどんどん溜まる気がする。後で見返したり片付けたりするフローが欲しい」</b>。
-      v2 から「削除しない代わりに隔離する」を貫いてきた裏返しだった。
-      <b>Tidy v5</b> は <b>review サブコマンド</b>で「`_捨て/` の中身を一覧 →
-      パターンで復元 → 古いものだけ物理削除」までを完結させる。
-      tidy 唯一の delete 経路、必ず <code>--yes</code> ゲート付き、不可逆動作は dry-run でまず提示する。
+      v5 で「捨て箱を自分で片付けられる」を作って、複数の場所を整理してもらった。次に出た声は
+      <b>「どこを・いつ・何を動かしたか分からなくなる。1か所で振り返れないの？」</b>。
+      記録は各フォルダに残っていたが <b>場所ごとに分散</b>していた。
+      <b>Tidy v6</b> は <b>history サブコマンド</b>で、apply / undo / redo / review の操作を
+      どのフォルダを整理しても <code>~/.tidy</code> の <b>1本のタイムライン</b>に集約する。
+      実ファイルは動かさず、来歴の索引だけをホームに置く設計。
     </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト105項目）</a>
+      <a class="btn btn-primary" href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">実物のコードを見る（公開・テスト114項目）</a>
+      <a class="btn btn-ghost" href="https://tidy-prototype-v5.vercel.app" target="_blank" rel="noopener">v5 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v4.vercel.app" target="_blank" rel="noopener">v4 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v3.vercel.app" target="_blank" rel="noopener">v3 を見る</a>
       <a class="btn btn-ghost" href="https://tidy-prototype-v2.vercel.app" target="_blank" rel="noopener">v2 を見る</a>
-      <a class="btn btn-ghost" href="https://tidy-prototype-v1.vercel.app" target="_blank" rel="noopener">v1（mock）を見る</a>
     </div>
     <div class="meta-row">
       <span>解決するバグ #18 / ファイル整理が進まない</span>
       <span>実装 / tidy（Claude Code skill）</span>
-      <span>v1 → v2 → v3 → v4 → v5（継続利用）</span>
+      <span>v1 → v2 → v3 → v4 → v5 → v6（一望性）</span>
     </div>
     <div class="disclaimer">
       ⚠ このページは <b>デモ（UIシミュレーション）です。実際のAPIやファイルシステムは使っていません</b>
       — ボタンの動きはすべてブラウザ内の演出です。<b>本物の実装</b>（実際にファイルを安全に整理する）は
-      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト105項目合格）の方です。
+      GitHub の <a href="https://github.com/satoryudev/tidy" target="_blank" rel="noopener">tidy</a>（Claude Code スキル・テスト114項目合格）の方です。
     </div>
   </div>
 </section>
 
 <section class="why">
   <div class="container">
-    <span class="section-tag">第8回インタビューから派生した second-order feedback</span>
-    <h2 class="section-h">「削除しない」の次に来た、<br/>「貯めたものをどう扱うか」。</h2>
-    <p class="section-sub">v4 で「普通の使い方が普通に動く」を作って、また使ってもらった。最初の感動の次に出てきたのは、運用の声だった。<br/><b>「_捨て にどんどん溜まる気がする。後で見返したり片付けたりするフローが欲しい」</b></p>
+    <span class="section-tag">使い続けてもらって出た third-order feedback</span>
+    <h2 class="section-h">1回の整理は完璧。<br/>でも「積み重ね」が見えなかった。</h2>
+    <p class="section-sub">v5 で「捨て箱を自分で片付けられる」を作って、Downloads も Desktop も Documents も整理してもらった。すると、1回1回は満足でも、通しで振り返る手段がないことに気づいた。<br/><b>「どこを・いつ・何を動かしたか分からなくなる。1か所で振り返れないの？」</b></p>
     <div class="why-grid">
       <div class="why-card v1">
-        <div class="k">v4 までは足りなかった</div>
+        <div class="k">v5 までは足りなかった</div>
         <ul>
-          <li>「削除しない＝<b>_捨て/</b> に隔離する」を v2 から徹底してきた</li>
-          <li>でも <b>_捨て/ が溜まっていくケア</b>が無かった</li>
-          <li>何が入ったか / いつ入ったか / 元はどこだったか、後で辿る手段なし</li>
-          <li>「安全に貯める」と「貯めっぱなしになる」は紙一重</li>
-          <li>結果: <b>「いつか溢れる予感」</b>が継続利用の不安として残る</li>
+          <li>記録は各フォルダの <b>_整理ログ/manifest-*.json</b> に残っていた</li>
+          <li>でも <b>場所ごとに分散</b>していて横串で見られない</li>
+          <li>「先週 tidy で何やったっけ」に答えられない</li>
+          <li>「あのフォルダ最後にいつ整理した？」も辿れない</li>
+          <li>個々の操作は安全でも、<b>全体像が掴めない</b>のが継続の壁</li>
         </ul>
       </div>
       <div class="why-card v2">
-        <div class="k">v5 で答えたこと</div>
+        <div class="k">v6 で答えたこと</div>
         <ul>
-          <li><b>review サブコマンド</b>: <b>_捨て/</b> の中身を一覧（隔離日時・元の場所・理由）</li>
-          <li><code>--restore "*.pdf" --yes</code> で pattern 復元（apply と同じ衝突回避）</li>
-          <li><code>--purge --older-than 30 --yes</code> で<b>古いものだけ物理削除</b>（tidy 唯一の delete 経路）</li>
-          <li>不可逆動作は dry-run で件数とサイズだけ提示 → <code>--yes</code> 必須</li>
-          <li><b>preview にサマリ行を追加</b>: 「コード/ 4件 / ドキュメント/ 12件 / _捨て/ 5件」を1行で</li>
-          <li>新規テスト追加で永続的に保証（89 → 105 項目）</li>
+          <li><b>history サブコマンド</b>: 全ての場所の操作を1本のタイムラインで</li>
+          <li>apply / undo / redo / review が <code>~/.tidy/history.jsonl</code> に集約</li>
+          <li><code>--target</code> で特定ディレクトリの操作だけに絞れる</li>
+          <li><b>実ファイルは動かさず、来歴の索引だけ</b>をホームに（速度・安全性そのまま）</li>
+          <li><code>TIDY_HOME</code> で保存先を差し替え可能（複数環境 / テスト隔離）</li>
+          <li>新規テスト追加で永続的に保証（105 → 114 項目）</li>
         </ul>
       </div>
     </div>
@@ -429,6 +432,50 @@
           <div class="fb-h">t_suggest_cross_target_single_source 追加</div>
           <div class="fb-p">~/Downloads 想定 → 別 target dir → apply → src 側からの消失 → undo で完全復元、までフルラウンドトリップを検証。テスト 82 → 89 項目。</div>
           <span class="fb-code">github.com/satoryudev/tidy@<span class="ok">0eb3c5e</span> — fix(suggest): cross-target single-source モードに対応</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feedback-section">
+  <div class="container">
+    <span class="section-tag">v6 のキモ: history — 全ての場所を1本のタイムラインに</span>
+    <h2 class="section-h">どこを・いつ・何を整理したか、<br/>1コマンドで振り返る。</h2>
+    <p class="section-sub">v5 まで、記録は各フォルダの <b>_整理ログ/</b> に残っていた。でも場所ごとに分散していて、通しで振り返れなかった。</p>
+
+    <div class="feedback-box">
+      <div class="feedback-quote">
+        <span class="qm">"</span>どこを・いつ・何を動かしたか分からなくなる。1か所で振り返れないの？
+      </div>
+
+      <div class="feedback-flow">
+        <div class="fb-step">
+          <div class="fb-num">記録は自動</div>
+          <div class="fb-h">整理のたびに1行、ホームへ集約</div>
+          <div class="fb-p">apply / undo / redo / review が成功するたび、その1行が <code>~/.tidy/history.jsonl</code> に追記される。どのフォルダを整理しても履歴は1本に集まる。書けなくても整理自体は成功（ベストエフォート）。</div>
+          <span class="fb-code">{"ts":"...","action":"apply",<br/>&nbsp;"target":"~/Downloads","moves":8,"trashed":2}</span>
+        </div>
+        <div class="fb-step">
+          <div class="fb-num">history</div>
+          <div class="fb-h">横断タイムライン — 新しい順に</div>
+          <div class="fb-p">いつ・何を・どこで、を記号ラベル付きで一望。場所をまたいで「先週 tidy で何やったっけ」に答えられる。</div>
+          <span class="fb-code"><span class="ok">tidy history</span><br/>06-24 17:24 ✕ 物理削除 12件(4.2MB) @Documents<br/>06-23 09:10 ▸ 整理 8件(隔離2) @Downloads</span>
+        </div>
+        <div class="fb-step">
+          <div class="fb-num">history --target</div>
+          <div class="fb-h">特定フォルダだけに絞る</div>
+          <div class="fb-p">「あのフォルダ最後にいつ整理した？」に一発。<code>--verbose</code> で manifest / ログのパスも辿れる。</div>
+          <span class="fb-code"><span class="ok">tidy history --target ~/Downloads</span><br/>記録数: 2 件（Downloads だけ）</span>
+        </div>
+      </div>
+
+      <div class="feedback-flow" style="margin-top:14px">
+        <div class="fb-step" style="grid-column:1/-1;border-color:var(--safe);background:rgba(62,224,138,0.05)">
+          <div class="fb-num" style="color:var(--safe)">実ファイルは動かさない — 索引だけホームへ</div>
+          <div class="fb-h">整理はローカル（rename）のまま、履歴だけを1か所に</div>
+          <div class="fb-p" style="margin-bottom:8px">「散らかりの整理」は従来どおり同一ボリューム内の rename で行い、ホーム <code>~/.tidy</code> に置くのは来歴の索引だけ。外付けドライブでも速度・安全性は変わらない。<code>TIDY_HOME</code> で保存先を差し替え可能（この履歴の上に、将来 Obsidian への書き出しも載せられる）。</div>
+          <span class="fb-code">github.com/satoryudev/tidy@<span class="ok">55bb104</span> — Add history subcommand (v6) / テスト 105 → 114 項目</span>
         </div>
       </div>
     </div>
@@ -537,12 +584,12 @@
 
 <section class="features">
   <div class="container">
-    <span class="section-tag">v5 で動くもの</span>
-    <h2 class="section-h">貯めたものを、<br/>自分で完結できる。</h2>
+    <span class="section-tag">v6 で動くもの</span>
+    <h2 class="section-h">整理を、<br/>1本の履歴で振り返る。</h2>
     <div class="grid">
-      <div class="feat"><div class="num">01 <span style="color:var(--accent2)">v5 NEW</span></div><h4>review — _捨て の見回り</h4><p><code>review &lt;dir&gt;</code> で隔離ファイルを一覧（<b>隔離日時・元の場所・理由</b>）。manifest を横断して、現在 _捨て に居る各ファイルの来歴を辞書化。</p></div>
-      <div class="feat"><div class="num">02 <span style="color:var(--accent2)">v5 NEW</span></div><h4>パターン復元 / 物理削除</h4><p><code>--restore "*.pdf" --yes</code> で元の場所に戻す。<code>--purge --older-than 30 --yes</code> で古いものだけ物理削除。<b>tidy 唯一の delete 経路</b>、不可逆動作は dry-run で件数 + サイズだけ提示。</p></div>
-      <div class="feat"><div class="num">03 <span style="color:var(--accent2)">v5 NEW</span></div><h4>preview サマリ行</h4><p>「<b>サマリ: コード/ 4件 / ドキュメント/ 12件 / _捨て/ 5件</b>」を移動予定行の直下に表示。100件規模の plan でも「どこに何件行くか」が一目で分かる。</p></div>
+      <div class="feat"><div class="num">01 <span style="color:var(--accent)">v6 NEW</span></div><h4>history — 横断タイムライン</h4><p><code>tidy history</code> で全ての場所の操作を新しい順に一望。apply / undo / redo / review が <code>~/.tidy/history.jsonl</code> に集約され、「いつ・何を・どこで」を記号ラベル付きで表示。</p></div>
+      <div class="feat"><div class="num">02 <span style="color:var(--accent)">v6 NEW</span></div><h4>--target フィルタ / 索引だけ集約</h4><p><code>--target &lt;dir&gt;</code> で特定フォルダの操作だけに絞る。<b>実ファイルは動かさず来歴の索引だけ</b>をホームへ。<code>TIDY_HOME</code> で保存先も差し替え可能。</p></div>
+      <div class="feat"><div class="num">03 <span style="color:var(--accent2)">v5〜</span></div><h4>review — _捨て の見回り</h4><p>隔離ファイルを一覧（隔離日時・元の場所・理由）、<code>--restore</code> で復元、<code>--purge --older-than 30 --yes</code> で古いものだけ物理削除（唯一の delete 経路）。</p></div>
       <div class="feat"><div class="num">04 <span style="color:var(--accent2)">v4〜</span></div><h4>Downloads → ホーム配下への振り分け</h4><p>scan ~/Downloads / suggest --target ~/Documents が素直に動く。cross_target 判定を「単一 root でも target が異なる場合」に拡張。</p></div>
       <div class="feat"><div class="num">05 <span style="color:var(--safe)">v3〜</span></div><h4>依存解析クラスタ</h4><p>Python の <b>import</b>、JS の <b>require / import</b>、HTML の <b>src= / href=</b>、CSS の <b>@import</b> を読む。連結したファイル群は同じ subfolder へまとめて配置。</p></div>
       <div class="feat"><div class="num">06</div><h4>削除しない隔離 + suggest / verify / redo（v2〜）</h4><p>不要・重複ファイルは <b>_捨て/</b> へ、assess で危険な対象は止める。plan は scan から自動生成、apply 後の整合性チェック、undo / redo / Ctrl-C 安全終了で「やり直し」のすべての方向に対応。</p></div>
@@ -552,40 +599,39 @@
 
 <section class="diff-section">
   <div class="container">
-    <span class="section-tag">v1 → v2 → v3 → v4 → v5 進化</span>
+    <span class="section-tag">v1 → v2 → v3 → v4 → v5 → v6 進化</span>
     <h2 class="section-h">何が変わったか。</h2>
     <table class="diff-table">
-      <thead><tr><th>観点</th><th>v1</th><th>v2</th><th class="v3-h">v3</th><th class="v4-h">v4</th><th class="v5-h">v5（NEW · 継続利用）</th></tr></thead>
+      <thead><tr><th>観点</th><th>v1</th><th>v2</th><th class="v3-h">v3</th><th class="v4-h">v4</th><th class="v5-h">v5</th><th class="v6-h">v6（NEW · 一望性）</th></tr></thead>
       <tbody>
-        <tr><td class="axis">テスト</td><td class="v1">なし</td><td class="v2">35</td><td class="v3">82</td><td class="v4">89</td><td class="v5"><b>105 項目</b>（review 含む）</td></tr>
-        <tr><td class="axis">_捨て/ の見回り</td><td class="v1">—</td><td class="v2">隔離はする</td><td class="v3">同左</td><td class="v4">同左</td><td class="v5"><b>review</b> で一覧（隔離日時・元の場所・理由）</td></tr>
-        <tr><td class="axis">復元</td><td class="v1">—</td><td class="v2">undo（全件）</td><td class="v3">undo + redo</td><td class="v4">同左</td><td class="v5">＋ <b>review --restore "*.pdf"</b>（pattern 指定で個別復元）</td></tr>
-        <tr><td class="axis">物理削除</td><td class="v1">—</td><td class="v2">行わない</td><td class="v3">行わない</td><td class="v4">行わない</td><td class="v5"><b>review --purge --older-than 30 --yes</b>（唯一の delete 経路）</td></tr>
-        <tr><td class="axis">preview</td><td class="v1">なし</td><td class="v2">件数のみ</td><td class="v3">＋ 総サイズ</td><td class="v4">＋ クラスタ警告</td><td class="v5">＋ <b>サマリ行</b>「コード/ 4件 / ドキュメント/ 12件 / _捨て/ 5件」</td></tr>
-        <tr><td class="axis">Downloads → 別 dir</td><td class="v1">—</td><td class="v2">—</td><td class="v3">エラーで動かず</td><td class="v4"><b>動く</b>（cross_target）</td><td class="v5">同左</td></tr>
-        <tr><td class="axis">分類</td><td class="v1">名前・拡張子</td><td class="v2">中身も読む</td><td class="v3">import / 参照も読む</td><td class="v4">同左</td><td class="v5">同左</td></tr>
-        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイル単位</td><td class="v3">連結クラスタを一緒に</td><td class="v4">同左</td><td class="v5">同左</td></tr>
-        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3">suggest が自動</td><td class="v4">同左</td><td class="v5">同左</td></tr>
+        <tr><td class="axis">テスト</td><td class="v1">なし</td><td class="v2">35</td><td class="v3">82</td><td class="v4">89</td><td class="v5">105</td><td class="v6"><b>114 項目</b>（history 含む）</td></tr>
+        <tr><td class="axis">操作履歴の一望</td><td class="v1">—</td><td class="v2">場所ごとに manifest</td><td class="v3">同左</td><td class="v4">同左</td><td class="v5">同左（分散）</td><td class="v6"><b>history</b> で全ての場所を1本のタイムラインに</td></tr>
+        <tr><td class="axis">「どこを整理した？」</td><td class="v1">—</td><td class="v2">辿れない</td><td class="v3">辿れない</td><td class="v4">辿れない</td><td class="v5">辿れない</td><td class="v6"><b>history --target</b> で場所ごとに絞れる</td></tr>
+        <tr><td class="axis">_捨て/ の見回り</td><td class="v1">—</td><td class="v2">隔離のみ</td><td class="v3">同左</td><td class="v4">同左</td><td class="v5"><b>review</b> で一覧/復元/物理削除</td><td class="v6">同左</td></tr>
+        <tr><td class="axis">Downloads → 別 dir</td><td class="v1">—</td><td class="v2">—</td><td class="v3">エラー</td><td class="v4"><b>動く</b></td><td class="v5">同左</td><td class="v6">同左</td></tr>
+        <tr><td class="axis">コードの扱い</td><td class="v1">無頓着</td><td class="v2">1ファイル単位</td><td class="v3"><b>連結クラスタ</b></td><td class="v4">同左</td><td class="v5">同左</td><td class="v6">同左</td></tr>
+        <tr><td class="axis">plan 作成</td><td class="v1">なし</td><td class="v2">手書き</td><td class="v3"><b>suggest 自動</b></td><td class="v4">同左</td><td class="v5">同左</td><td class="v6">同左</td></tr>
+        <tr><td class="axis">安全性</td><td class="v1">なし</td><td class="v2">隔離+undo+assess</td><td class="v3">+verify/redo</td><td class="v4">同左</td><td class="v5">同左</td><td class="v6">同左（履歴で追跡性も）</td></tr>
       </tbody>
     </table>
 
     <div class="vpc-cite">
-      <h5>VPC v1 · Pain → v5 の答え</h5>
+      <h5>VPC v1 · Pain → v6 の答え</h5>
       <blockquote>
-        v1 は <i>見せる</i>、v2 は <b>怖くないから押せる</b>、v3 は <b>関係性も壊さない</b>、v4 は <b>普通の使い方が普通に動く</b>を作った。
-        v5 は <b>「貯めたものを自分で完結できる」</b>を実装した — 「<b>削除しない</b>」を貫いた先に「<b>_捨て にどんどん溜まる</b>」という運用の不安があった。
-        review で一覧 → 復元 → 古いものだけ物理削除、までを <code>--yes</code> ゲート付きで自分で完結できる。
-        <b>継続利用は「派手な新機能」より「自分の普段のフローが普通に動くか / 安全に貯めたものを自分で片付けられるか」のセット</b>。
+        v1 は <i>見せる</i>、v2 は <b>怖くないから押せる</b>、v3 は <b>関係性も壊さない</b>、v4 は <b>普通の使い方が普通に動く</b>、v5 は <b>貯めたものを自分で完結できる</b>を作った。
+        v6 は <b>「積み重ねを一望できる」</b>を実装した — 1回の整理は完璧でも、複数の場所を整理すると「どこを・いつ・何を」が分散して見えなくなっていた。
+        history で全ての操作を1本のタイムラインに集約し、場所をまたいで振り返れる。<b>実ファイルは動かさず、来歴の索引だけをホームに</b>。
+        <b>使い続けてもらうほど、機能そのものより「安心して任せ続けられる土台（振り返れる・辿れる）」への要望が出てくる</b>。
       </blockquote>
-      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト105項目）</div>
+      <div class="source">出典: lectures/lecture3/vpc-v1.md · 実装: github.com/satoryudev/tidy（テスト114項目）</div>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container row">
-    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6 · 継続利用</div>
-    <div class="mono">v5.0.0 · prototype</div>
+    <div>built with AI · satoryudev · web3·AI概論 2026 · Lecture 6 · 一望性</div>
+    <div class="mono">v6.0.0 · prototype</div>
   </div>
 </footer>
 
